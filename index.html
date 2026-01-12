@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Digilayn – Step in Digital</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="developer" content="Musa Mgijima">
+    <meta name="author" content="Musa Mgijima (Digilayn Studio)">
+    <meta name="description" content="Digilayn is a creative studio specialising in digital products and modern interior design. Partnership opportunities available.">
+    <meta name="copyright" content="© 2025 Digilayn. All rights reserved.">
+    <meta name="robots" content="index,follow">
+    <meta name="theme-color" content="#6ddf4f">
+
+    <link rel="icon" href="favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
+
+    <style>
+        :root {
+          --digilayn-green: #6ddf4f;
+          --warning-red: #e74c3c;
+          --android-green: #3DDC84;
+        }
+
+        body {
+          text-align: center;
+          padding: 60px 20px;
+          font: 18px Helvetica, sans-serif;
+          color: #333;
+          background: #f5f5f5;
+          margin: 0;
+          user-select: none;
+        }
+
+        .container {
+          max-width: 650px;
+          margin: 0 auto;
+          background: #ffffff;
+          padding: 40px 30px;
+          border-radius: 12px;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+
+        .maintenance-banner {
+            background: var(--warning-red);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        img.logo {
+          width: 120px;
+          display: block;
+          margin: 0 auto 20px;
+          pointer-events: none;
+        }
+
+        h1 { font-size: 32px; margin-bottom: 10px; color: #222; }
+
+        .tagline {
+          font-weight: bold;
+          color: var(--digilayn-green);
+          margin-bottom: 20px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .test-box, .upcoming-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .upcoming-box {
+            background: #ffffff;
+        }
+
+        .device-badge {
+            display: inline-block;
+            background: var(--android-green);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-pill {
+            float: right;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .project-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 6px;
+            border: 1px solid #f0f0f0;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .project-link:hover {
+            border-color: var(--digilayn-green);
+            background: #fff;
+            transform: translateY(-2px);
+        }
+
+        .apk-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-apk {
+            background: #333;
+            color: white !important;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            flex: 1;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-apk:hover { background: #000; }
+
+        .sideload-note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 15px;
+            line-height: 1.4;
+            border-left: 3px solid var(--warning-red);
+            padding-left: 10px;
+        }
+
+        .pro-box {
+            margin-top: 30px;
+            padding: 25px;
+            background: #ffffff;
+            border: 2px dashed var(--digilayn-green);
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .pro-box h2 { font-size: 22px; color: var(--digilayn-green); margin-top: 0; }
+        .pro-box ul { padding-left: 20px; font-size: 15px; }
+        .pro-box li { margin-bottom: 10px; }
+
+        .btn-download {
+            display: block;
+            background: var(--digilayn-green);
+            color: #fff !important;
+            padding: 15px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .btn-download:hover { transform: scale(1.02); }
+        .footer { margin-top: 40px; font-size: 14px; color: #555; }
+        .copyright { font-size: 11px; color: #999; margin-top: 10px; }
+        a { color: var(--digilayn-green); font-weight: bold; text-decoration: none; }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="maintenance-banner">⚠️ Digilayn Experience Upgrade in Progress</div>
+
+    <img id="dl-logo" class="logo" alt="Digilayn Logo">
+
+    <h1>Digilayn Studio</h1>
+    <p class="tagline">Step in Digital</p>
+
+    <div class="test-box">
+        <span class="device-badge">ANDROID ONLY</span>
+        <h3 style="margin-top:0;">Live App Testing</h3>
+        <p style="font-size: 15px; line-height: 1.5;">
+            Testers and partners are invited to try the latest <strong>Isphandi Rider</strong> and <strong>Isphandi Driver</strong> builds.
+        </p>
+
+        <div class="apk-links">
+            <a href="IsphandiRider.apk" class="btn-apk">Isphandi Rider APK</a>
+            <a href="IsphandiDriver.apk" class="btn-apk">Isphandi Driver APK</a>
+        </div>
+
+        <div class="sideload-note">
+            <strong>Security Note:</strong> Since these apps are side-loaded, Android may warn you.
+            Click <strong>“Install Anyway”</strong> to proceed.
+        </div>
+    </div>
+
+    <div class="upcoming-box">
+        <h3 style="margin-top:0; font-size: 18px;">Upcoming Web Projects</h3>
+        <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+            We are currently building the following digital experiences. Click to view progress.
+        </p>
+
+        <a href="https://lastpassionclothing.co.za/" target="_blank" class="project-link">
+            <div>
+                <strong style="display: block; color: #222;">Last Passion Clothing</strong>
+                <span style="font-size: 12px; color: #888;">Modern E-commerce Store</span>
+            </div>
+            <span class="status-pill">In Development</span>
+        </a>
+    </div>
+
+    <div class="pro-box">
+        <h2>Digilayn Pro Partnership</h2>
+        <p>We build your digital infrastructure with <strong>Zero Upfront Fees</strong>.</p>
+
+        <ul>
+            <li><strong>Revenue Share:</strong> 5% of earnings.</li>
+            <li><strong>Ownership:</strong> Digilayn retains all source code.</li>
+            <li><strong>Operating Costs:</strong> Client covers hosting & gateways.</li>
+        </ul>
+
+        <a href="Digilayn%20Partnership%20Agreement.pdf" class="btn-download" download>
+            View Partnership Agreement (PDF)
+        </a>
+    </div>
+
+    <div style="margin-top: 30px; font-size: 14px;">
+        <a href="legal.html">Legal & Policies</a> • 
+        <a href="https://wa.me/27815532209">Contact Support</a>
+    </div>
+
+    <p class="footer">Digital Products & Modern Interior Design</p>
+    <p class="copyright">
+        © 2025 Digilayn Studio. All rights reserved.
+    </p>
+</div>
+
+<script>
+    console.log("%cDeveloped by Musa Mgijima – Digilayn Studio", "color:#6ddf4f;font-size:16px;font-weight:bold;");
+    document.getElementById("dl-logo").src = "logo.jpg";
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("copy", e => e.preventDefault());
+</script>
+</body>
+</html>
