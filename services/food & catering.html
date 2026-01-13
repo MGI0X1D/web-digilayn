@@ -116,11 +116,24 @@
         addRatingButtonListeners();
     };
 
-    db.collection('poortjie').doc('services').collection('food').get()
-        .then(snapshot => {
-            const providers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderProviders(providers);
-            filterAndSort();
+    db.collection('poortjie').doc('services').get()
+        .then(doc => {
+            if (doc.exists) {
+                const homeScreenData = doc.data().homeScreen;
+                const cateringData = homeScreenData['Food & Catering'].data;
+                if (cateringData && typeof cateringData === 'object') {
+                    const providers = Object.keys(cateringData).map(key => ({
+                        id: key,
+                        ...cateringData[key]
+                    }));
+                    renderProviders(providers);
+                    filterAndSort();
+                } else {
+                    serviceProviderGrid.innerHTML = '<p>No food & catering services found.</p>';
+                }
+            } else {
+                 serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+            }
         })
         .catch(error => {
             console.error("Error fetching services: ", error);

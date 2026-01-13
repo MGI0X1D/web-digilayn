@@ -116,11 +116,24 @@
         addRatingButtonListeners();
     };
 
-    db.collection('poortjie').doc('services').collection('artisans').get()
-        .then(snapshot => {
-            const providers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderProviders(providers);
-            filterAndSort();
+    db.collection('poortjie').doc('services').get()
+        .then(doc => {
+            if (doc.exists) {
+                const homeScreenData = doc.data().homeScreen;
+                const interiorData = homeScreenData['Home & Interior'].data;
+                if (interiorData && typeof interiorData === 'object') {
+                    const providers = Object.keys(interiorData).map(key => ({
+                        id: key,
+                        ...interiorData[key]
+                    }));
+                    renderProviders(providers);
+                    filterAndSort();
+                } else {
+                    serviceProviderGrid.innerHTML = '<p>No home & interior services found.</p>';
+                }
+            } else {
+                 serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+            }
         })
         .catch(error => {
             console.error("Error fetching services: ", error);
@@ -141,7 +154,7 @@
         });
 
         if (sortValue === 'rating') {
-            filteredCards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(b.dataset.rating));
+            filteredCards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
         } else if (sortValue === 'name') {
             filteredCards.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
         }

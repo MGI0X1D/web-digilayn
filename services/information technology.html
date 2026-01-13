@@ -121,11 +121,24 @@
         addRatingButtonListeners();
     };
 
-    db.collection('poortjie').doc('services').collection('developers').get()
-        .then(snapshot => {
-            const providers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderProviders(providers);
-            filterAndSort();
+    db.collection('poortjie').doc('services').get()
+        .then(doc => {
+            if (doc.exists) {
+                const homeScreenData = doc.data().homeScreen;
+                const techData = homeScreenData['Information Technology'].data;
+                if (techData && typeof techData === 'object') {
+                    const providers = Object.keys(techData).map(key => ({
+                        id: key,
+                        ...techData[key]
+                    }));
+                    renderProviders(providers);
+                    filterAndSort();
+                } else {
+                    serviceProviderGrid.innerHTML = '<p>No technical services found.</p>';
+                }
+            } else {
+                 serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+            }
         })
         .catch(error => {
             console.error("Error fetching services: ", error);
