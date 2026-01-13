@@ -13,12 +13,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Enable offline persistence
-db.enablePersistence()
+// Enable offline persistence with multi-tab support
+db.enablePersistence({ synchronizeTabs: true })
   .catch((err) => {
     if (err.code == 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time.
-      console.warn('Firebase persistence failed: multiple tabs open.');
+      // This can still happen if multiple tabs are open with different persistence settings.
+      console.warn('Firebase persistence failed: multiple tabs open with different settings.');
     } else if (err.code == 'unimplemented') {
       // The current browser does not support all of the features required to enable persistence.
       console.warn('Firebase persistence failed: browser does not support it.');

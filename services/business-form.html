@@ -66,7 +66,7 @@
 
             <div class="form-group mb-4">
                 <label for="address" class="block mb-1 font-bold text-sm uppercase tracking-wider">Business Address</label>
-                <input type="text" id="address" name="address" placeholder="Street, Area, Town" class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition">
+                <input type="text" id="address" name="address" placeholder="Start typing your business address..." class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition">
             </div>
 
             <div class="form-group mb-4">
@@ -117,6 +117,8 @@
     const hoursInput = document.getElementById('hours');
     const descInput = document.getElementById('description');
 
+    let isAddressSelectedFromAutocomplete = false;
+
     showLoader();
 
     const fetchCategories = () => {
@@ -128,20 +130,15 @@
                     const categories = Object.keys(homeScreenData);
                     categories.forEach(categoryName => {
                         const option = document.createElement('option');
-                        option.value = categoryName; // e.g., "Transport"
+                        option.value = categoryName;
                         option.textContent = categoryName;
                         businessTypeInput.appendChild(option);
                     });
-                } else {
-                     console.log("'homeScreen' map not found in the document.");
                 }
-            } else {
-                console.log("No 'services' document found!");
             }
         }).catch(error => {
             console.error("Error fetching categories: ", error);
         }).finally(() => {
-            // Add the "Other" option after fetching or in case of error
             const otherOption = document.createElement('option');
             otherOption.value = 'Other';
             otherOption.textContent = 'Other';
@@ -150,103 +147,62 @@
     };
 
     const lockForm = (data) => {
-        ownerNameInput.value = data.ownerName || '';
-        emailInput.value = data.email || '';
-        phoneInput.value = data.phone || '';
-        businessNameInput.value = data.businessName || '';
-        subHeadingInput.value = data.subHeading || '';
-        businessTypeInput.value = data.businessType || '';
-        addressInput.value = data.address || '';
-        websiteInput.value = data.website || '';
-        hoursInput.value = data.hours || '';
-        descInput.value = data.description || '';
-
         businessForm.querySelectorAll('input, textarea, select').forEach(el => el.disabled = true);
         submitBtn.disabled = true;
         submitBtn.textContent = 'Application Pending';
-
         const formDescription = document.querySelector('#form-container p');
         if (formDescription) {
             formDescription.textContent = 'You have a pending application. Please wait for it to be reviewed before submitting another.';
-            formDescription.classList.add('text-yellow-600', 'dark:text-yellow-400');
+            formDescription.classList.add('text-yellow-600', 'dark:text-yellow-400', 'font-bold');
             formDescription.classList.remove('opacity-70');
         }
     };
 
     const validateForm = () => {
-        const nameVal = ownerNameInput.value.trim();
-        const emailVal = emailInput.value.trim();
-        const phoneVal = phoneInput.value.trim();
-        const businessNameVal = businessNameInput.value.trim();
-        const businessTypeVal = businessTypeInput.value;
-        const descVal = descInput.value.trim();
+        const isNameValid = ownerNameInput.value.trim().length > 0;
+        const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+        const isPhoneValid = /^\d{10}$/.test(phoneInput.value.trim());
+        const isBusinessNameValid = businessNameInput.value.trim().length > 0;
+        const isBusinessTypeValid = businessTypeInput.value !== '';
+        const isDescValid = descInput.value.trim().length > 0;
+        const isAddressValid = isAddressSelectedFromAutocomplete || addressInput.value.trim() === '';
 
-        const isNameValid = nameVal.length > 0;
-        const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
-        const isPhoneValid = /^\d{10}$/.test(phoneVal);
-        const isBusinessNameValid = businessNameVal.length > 0;
-        const isBusinessTypeValid = businessTypeVal !== '';
-        const isDescValid = descVal.length > 0;
-
-        submitBtn.disabled = !(isNameValid && isEmailValid && isPhoneValid && isBusinessNameValid && isDescValid && isBusinessTypeValid);
+        submitBtn.disabled = !(isNameValid && isEmailValid && isPhoneValid && isBusinessNameValid && isDescValid && isBusinessTypeValid && isAddressValid);
     };
 
-    businessNameInput.addEventListener('input', validateForm);
-    businessTypeInput.addEventListener('change', validateForm);
-    subHeadingInput.addEventListener('input', validateForm);
-    websiteInput.addEventListener('input', validateForm);
-    hoursInput.addEventListener('input', validateForm);
+    [businessNameInput, businessTypeInput, subHeadingInput, websiteInput, hoursInput, descInput].forEach(el => {
+        el.addEventListener('input', validateForm);
+    });
 
     phoneInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
         validateForm();
     });
-
-    descInput.addEventListener('input', validateForm);
+    
+    addressInput.addEventListener('input', () => {
+        isAddressSelectedFromAutocomplete = false;
+        validateForm();
+    });
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            fetchCategories(); // Fetch categories for logged in user
-            const applicationsRef = db.collection('poortjie').doc('applications').collection('listings').where('userId', '==', user.uid);
-            
-            applicationsRef.orderBy('createdAt', 'desc').get().then(snapshot => {
-                let pendingApplicationData = null;
-
-                if (!snapshot.empty) {
-                    statusContainer.classList.remove('hidden');
-                    let statusHTML = '<h3 class="text-lg font-bold mb-2">Your Applications</h3>';
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const status = data.status || 'pending';
-                        if (status === 'pending') {
-                            pendingApplicationData = data;
-                        }
-                        let statusColor = 'text-yellow-500';
-                        if (status === 'approved') statusColor = 'text-green-500';
-                        if (status === 'rejected') statusColor = 'text-red-500';
-                        statusHTML += `<div class="p-2 border-b border-gray-200 dark:border-slate-700"><p class="font-semibold">${data.businessName}: <span class="font-bold ${statusColor}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></p></div>`;
-                    });
-                    statusContainer.innerHTML = statusHTML;
-                }
-
-                if (pendingApplicationData) {
-                    lockForm(pendingApplicationData);
-                    hideLoader();
-                    formContainer.style.display = 'block';
+            fetchCategories();
+            const applicationsRef = db.collection('poortjie').doc('applications').collection('listings').where('userId', '==', user.uid).orderBy('createdAt', 'desc');
+            applicationsRef.get().then(snapshot => {
+                const pendingApplication = snapshot.docs.find(doc => doc.data().status === 'pending');
+                if (pendingApplication) {
+                    lockForm(pendingApplication.data());
                 } else {
-                    if (user.email) emailInput.value = user.email;
                     const userDocRef = db.collection('users').doc(user.uid);
                     userDocRef.get().then((userDoc) => {
                         if (userDoc.exists) {
                             const userData = userDoc.data();
-                            if (userData.displayName) ownerNameInput.value = userData.displayName;
-                            if (userData.phone) phoneInput.value = userData.phone;
-                        } else if (user.displayName) {
-                            ownerNameInput.value = user.displayName;
+                            ownerNameInput.value = userData.displayName || user.displayName || '';
+                            phoneInput.value = userData.phone || '';
+                        } else {
+                           ownerNameInput.value = user.displayName || '';
                         }
-                    }).catch((error) => {
-                        console.log("Error getting user document:", error);
-                        if(user.displayName) ownerNameInput.value = user.displayName;
+                        emailInput.value = user.email || '';
                     }).finally(() => {
                         hideLoader();
                         formContainer.style.display = 'block';
@@ -266,12 +222,11 @@
 
     businessForm.addEventListener('submit', event => {
         event.preventDefault();
+        if (submitBtn.disabled) return;
         showLoader();
-
         const user = auth.currentUser;
         if (!user) {
-            hideLoader();
-            alert('You must be logged in to submit this form.');
+            window.location.href = '../authentication/login.html';
             return;
         }
 
@@ -284,17 +239,15 @@
             businessName: businessNameInput.value,
             subHeading: subHeadingInput.value,
             businessType: businessTypeInput.value,
-            address: addressInput.value,
+            address: addressInput.value || null,
             website: websiteInput.value,
             hours: hoursInput.value,
             description: descInput.value,
             status: 'pending',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-
         db.collection('poortjie').doc('applications').collection('listings').add(businessData)
             .then(() => {
-                hideLoader();
                 alert('Thank you! Your business has been submitted successfully.');
                 window.location.reload();
             })
@@ -304,7 +257,33 @@
                 alert('There was an error submitting your form.');
             });
     });
+
+    function initAutocomplete() {
+        const poortjieCenter = new google.maps.LatLng(-26.455931, 27.770280);
+        const farthestPoint = new google.maps.LatLng(-26.454071, 27.787416);
+        // Calculate a more generous radius and add a buffer (e.g., 20%)
+        const calculatedRadius = google.maps.geometry.spherical.computeDistanceBetween(poortjieCenter, farthestPoint) * 1.5;
+        const circle = new google.maps.Circle({ center: poortjieCenter, radius: calculatedRadius });
+
+        const autocomplete = new google.maps.places.Autocomplete(addressInput, {
+            bounds: circle.getBounds(),
+            strictBounds: false, // Changed to false to bias results, not restrict them
+            componentRestrictions: { country: "za" },
+            fields: ["formatted_address"],
+            types: ["address"],
+        });
+
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place.formatted_address) {
+                addressInput.value = place.formatted_address;
+                isAddressSelectedFromAutocomplete = true;
+                validateForm();
+            }
+        });
+    }
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCXnSxBam3mjlfEx3F4XL_7ZIwLEbov0n8&libraries=places,geometry&callback=initAutocomplete" async defer></script>
 
 </body>
 </html>
