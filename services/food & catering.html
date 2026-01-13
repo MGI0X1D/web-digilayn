@@ -68,16 +68,27 @@
 </footer>
 
 <div id="rating-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
-    </div>
+</div>
 
 <script src="../scripts/theme.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../scripts/firebase.js"></script>
+<script src="../scripts/rating.js"></script>
 
 <script>
     const serviceProviderGrid = document.getElementById('service-provider-grid');
     let serviceCards = [];
+
+    const addRatingButtonListeners = () => {
+        document.querySelectorAll('.rate-service').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const serviceId = e.currentTarget.dataset.serviceId;
+                const serviceKey = e.currentTarget.dataset.serviceKey;
+                window.openRatingModal(serviceId, serviceKey);
+            });
+        });
+    }
 
     const renderProviders = (providers) => {
         serviceProviderGrid.innerHTML = '';
@@ -87,7 +98,7 @@
             card.dataset.name = provider.businessName;
             card.dataset.rating = provider.rating || 0;
 
-            const rating = provider.rating || 'N/A';
+            const rating = provider.rating ? parseFloat(provider.rating).toFixed(1) : 'N/A';
             const contact = provider.phone || provider.email || 'No contact';
 
             card.innerHTML = `
@@ -107,7 +118,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
                     <a href="tel:${provider.phone}" class="flex-1 text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Call</a>
-                    <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service">Rate</button>
+                    <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service" data-service-id="${provider.id}" data-service-key="Food & Catering">Rate</button>
                 </div>
             `;
             serviceProviderGrid.appendChild(card);
@@ -116,30 +127,31 @@
         addRatingButtonListeners();
     };
 
-    db.collection('poortjie').doc('services').get()
-        .then(doc => {
-            if (doc.exists) {
-                const homeScreenData = doc.data().homeScreen;
-                const cateringData = homeScreenData['Food & Catering'].data;
-                if (cateringData && typeof cateringData === 'object') {
-                    const providers = Object.keys(cateringData).map(key => ({
-                        id: key,
-                        ...cateringData[key]
-                    }));
-                    renderProviders(providers);
-                    filterAndSort();
+    const fetchProviders = () => {
+        db.collection('poortjie').doc('services').get()
+            .then(doc => {
+                if (doc.exists) {
+                    const homeScreenData = doc.data().homeScreen;
+                    const cateringData = homeScreenData['Food & Catering'].data;
+                    if (cateringData && typeof cateringData === 'object') {
+                        const providers = Object.keys(cateringData).map(key => ({
+                            id: key,
+                            ...cateringData[key]
+                        }));
+                        renderProviders(providers);
+                    } else {
+                        serviceProviderGrid.innerHTML = '<p>No food & catering services found.</p>';
+                    }
                 } else {
-                    serviceProviderGrid.innerHTML = '<p>No food & catering services found.</p>';
+                     serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
                 }
-            } else {
-                 serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching services: ", error);
-            serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
-        });
-
+            })
+            .catch(error => {
+                console.error("Error fetching services: ", error);
+                serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+            });
+    };
+    
     const searchBar = document.getElementById('search-bar');
     const sortList = document.getElementById('sort-list');
 
@@ -147,28 +159,26 @@
         const searchTerm = searchBar.value.toLowerCase();
         const sortValue = sortList.value;
 
-        let filteredCards = serviceCards.filter(card => {
+        let filteredProviders = serviceCards.filter(card => {
             const name = card.dataset.name.toLowerCase();
-            const content = card.textContent.toLowerCase();
-            return name.includes(searchTerm) || content.includes(searchTerm);
+            return name.includes(searchTerm);
         });
 
         if (sortValue === 'rating') {
-            filteredCards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+            filteredProviders.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
         } else if (sortValue === 'name') {
-            filteredCards.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+            filteredProviders.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
         }
 
         serviceProviderGrid.innerHTML = '';
-        filteredCards.forEach(card => serviceProviderGrid.appendChild(card));
+        filteredProviders.forEach(card => serviceProviderGrid.appendChild(card));
     };
 
     searchBar.addEventListener('input', filterAndSort);
     sortList.addEventListener('change', filterAndSort);
 
-    const addRatingButtonListeners = () => {
-         // ... existing rating modal logic ...
-    }
+    // Initial fetch
+    fetchProviders();
 </script>
 </body>
 </html>
