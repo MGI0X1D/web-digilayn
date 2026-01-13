@@ -76,10 +76,11 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../scripts/firebase.js"></script>
 <script src="../scripts/rating.js"></script>
+<script src="../scripts/card-renderer.js"></script>
 
 <script>
     const serviceProviderGrid = document.getElementById('service-provider-grid');
-    let serviceCards = [];
+    let allProviders = [];
 
     const addRatingButtonListeners = () => {
         document.querySelectorAll('.rate-service').forEach(button => {
@@ -91,40 +92,14 @@
         });
     }
 
-    const renderProviders = (providers) => {
+    const renderProviders = async (providers) => {
         serviceProviderGrid.innerHTML = '';
-        providers.forEach(provider => {
-            const card = document.createElement('div');
-            card.className = 'card service-card p-6 rounded-2xl border-l-4 border-l-green-500 flex flex-col justify-between bg-white dark:bg-slate-800 shadow-sm';
-            card.dataset.name = provider.businessName;
-            card.dataset.rating = provider.rating || 0;
-
-            const rating = provider.rating ? parseFloat(provider.rating).toFixed(1) : 'N/A';
-            const contact = provider.phone || provider.email || 'No contact';
-
-            card.innerHTML = `
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-bold">${provider.businessName}</h3>
-                        <div class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full shrink-0">
-                            <span>${rating}</span>
-                            <i class="fas fa-star text-xs"></i>
-                        </div>
-                    </div>
-                    <p class="text-sm opacity-70 mb-4">${provider.description}</p>
-                    <div class="text-sm font-medium space-y-2 mb-4">
-                        <p class="flex items-center gap-2"><i class="fas fa-phone text-green-500"></i> ${contact}</p>
-                        <p class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-500"></i> ${provider.address || 'Poortjie'}</p>
-                    </div>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
-                    <a href="tel:${provider.phone}" class="flex-1 text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Call</a>
-                    <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service" data-service-id="${provider.id}" data-service-key="Information Technology">Rate</button>
-                </div>
-            `;
-            serviceProviderGrid.appendChild(card);
-        });
-        serviceCards = Array.from(document.querySelectorAll('.service-card'));
+        for (const provider of providers) {
+            const card = await renderServiceCard(provider, 'Information Technology');
+            if (card) {
+                serviceProviderGrid.appendChild(card);
+            }
+        }
         addRatingButtonListeners();
     };
 
@@ -135,11 +110,11 @@
                     const homeScreenData = doc.data().homeScreen;
                     const techData = homeScreenData['Information Technology'].data;
                     if (techData && typeof techData === 'object') {
-                        const providers = Object.keys(techData).map(key => ({
+                        allProviders = Object.keys(techData).map(key => ({
                             id: key,
                             ...techData[key]
                         }));
-                        renderProviders(providers);
+                        filterAndSort();
                     } else {
                         serviceProviderGrid.innerHTML = '<p>No technical services found.</p>';
                     }
@@ -160,19 +135,18 @@
         const searchTerm = searchBar.value.toLowerCase();
         const sortValue = sortList.value;
 
-        let filteredProviders = serviceCards.filter(card => {
-            const name = card.dataset.name.toLowerCase();
+        let filteredProviders = allProviders.filter(provider => {
+            const name = provider.businessName.toLowerCase();
             return name.includes(searchTerm);
         });
 
         if (sortValue === 'rating') {
-            filteredProviders.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+            filteredProviders.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         } else if (sortValue === 'name') {
-            filteredProviders.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+            filteredProviders.sort((a, b) => a.businessName.localeCompare(b.businessName));
         }
 
-        serviceProviderGrid.innerHTML = '';
-        filteredProviders.forEach(card => serviceProviderGrid.appendChild(card));
+        renderProviders(filteredProviders);
     };
 
     searchBar.addEventListener('input', filterAndSort);
