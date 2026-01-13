@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digilayn | Transport Services</title>
+    <meta name="author" content="Musa Mgijima">
+    <meta name="description" content="Find reliable and affordable transport services in Poortjie, from school shuttles to emergency towing.">
+    <meta name="keywords" content="Poortjie, transport, school transport, towing, delivery, Kasi services, Digilayn">
+    <meta name="copyright" content="© 2026 Digilayn. All rights reserved.">
+    <meta name="robots" content="index,follow">
+    <meta name="theme-color" content="#22c55e">
+
+    <link rel="icon" href="../favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../styles/main.css">
+    <style>
+        /* Smooth transitions for theme switching */
+        body { transition: background-color 0.3s ease, color 0.3s ease; }
+        .card { transition: transform 0.2s ease; }
+        .selected { color: #f59e0b !important; }
+    </style>
+</head>
+<body class="font-sans antialiased bg-white dark:bg-slate-900 dark:text-slate-100">
+
+<div class="fixed top-5 right-5 z-50 flex gap-2">
+    <button id="theme-toggle" class="px-4 py-2 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition flex items-center gap-2">
+        <span id="theme-icon">🌓</span> <span class="text-xs font-bold uppercase tracking-widest">Mode</span>
+    </button>
+</div>
+
+<header class="max-w-6xl mx-auto pt-20 pb-12 px-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase inline-block">Transport</div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mt-2 tracking-tight">Service Providers</h1>
+        </div>
+        <a href="../index.html" class="w-full md:w-auto text-center px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition whitespace-nowrap">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+        </a>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-24">
+
+    <div class="mb-8 flex flex-col md:flex-row gap-4">
+        <div class="relative flex-grow">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="search-bar" placeholder="Search providers..." class="w-full pl-10 pr-4 py-3 rounded-lg border dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div>
+        <select id="sort-list" class="px-4 py-3 rounded-lg border dark:bg-slate-800 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="rating">Sort by Rating</option>
+            <option value="name">Sort by Name (A-Z)</option>
+        </select>
+    </div>
+
+    <div id="service-provider-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div class="card service-card p-6 rounded-2xl border-l-4 border-l-green-500 flex flex-col justify-between bg-white dark:bg-slate-800 shadow-sm" data-name="Poortjie Shuttles" data-rating="4.8">
+            <div>
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-xl font-bold">Poortjie Shuttles</h3>
+                    <div class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full shrink-0">
+                        <span>4.8</span>
+                        <i class="fas fa-star text-xs"></i>
+                    </div>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Reliable school transport for your peace of mind. Daily routes across Poortjie.</p>
+                <div class="text-sm font-medium space-y-2 mb-4">
+                    <p class="flex items-center gap-2"><i class="fas fa-phone text-green-500"></i> 072 123 4567</p>
+                    <p class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-500"></i> Zone 1, 2, Ext 5</p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                <a href="tel:0721234567" class="flex-1 text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Call</a>
+                <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service">Rate</button>
+            </div>
+        </div>
+
+        <div class="card service-card p-6 rounded-2xl border-l-4 border-l-red-500 flex flex-col justify-between bg-white dark:bg-slate-800 shadow-sm" data-name="Kasi Towing 24/7" data-rating="4.5">
+            <div>
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-xl font-bold">Kasi Towing 24/7</h3>
+                    <div class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full shrink-0">
+                        <span>4.5</span>
+                        <i class="fas fa-star text-xs"></i>
+                    </div>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Stuck on the road? Fast and affordable emergency towing services.</p>
+                <div class="text-sm font-medium space-y-2 mb-4">
+                    <p class="flex items-center gap-2"><i class="fas fa-phone text-red-500"></i> 083 765 4321</p>
+                    <p class="flex items-center gap-2"><i class="fas fa-clock text-red-500"></i> 24-hour Emergency</p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                <a href="tel:0837654321" class="flex-1 text-center py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition">Help</a>
+                <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service">Rate</button>
+            </div>
+        </div>
+
+        <div class="card service-card p-6 rounded-2xl border-l-4 border-l-green-500 flex flex-col justify-between bg-white dark:bg-slate-800 shadow-sm" data-name="Fetch-It Bike Delivery" data-rating="4.9">
+            <div>
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-xl font-bold">Fetch-It Delivery</h3>
+                    <div class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full shrink-0">
+                        <span>4.9</span>
+                        <i class="fas fa-star text-xs"></i>
+                    </div>
+                </div>
+                <p class="text-sm opacity-70 mb-4">Quick local deliveries. From your favorite Kota to documents.</p>
+                <div class="text-sm font-medium space-y-2 mb-4">
+                    <p class="flex items-center gap-2"><i class="fas fa-phone text-green-500"></i> 061 987 6543</p>
+                    <p class="flex items-center gap-2"><i class="fas fa-clock text-green-500"></i> 8 AM - 6 PM</p>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                <a href="tel:0619876543" class="flex-1 text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Call</a>
+                <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service">Rate</button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer class="text-center py-12 border-t border-gray-100 dark:border-slate-800 opacity-50 text-xs">
+    &copy; 2026 Digilayn. Empowering Poortjie economies.
+</footer>
+
+<div id="rating-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md p-6 md:p-8 rounded-2xl shadow-2xl">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold">Rate <span id="modal-service-name" class="text-green-600"></span></h3>
+            <button id="close-modal" class="text-2xl font-bold">&times;</button>
+        </div>
+        <form id="rating-form">
+            <div class="mb-6">
+                <label class="block text-sm font-bold mb-2 uppercase tracking-wide">Your Rating</label>
+                <div id="star-rating" class="flex items-center gap-3 text-3xl text-slate-300">
+                    <i class="fas fa-star cursor-pointer" data-value="1"></i>
+                    <i class="fas fa-star cursor-pointer" data-value="2"></i>
+                    <i class="fas fa-star cursor-pointer" data-value="3"></i>
+                    <i class="fas fa-star cursor-pointer" data-value="4"></i>
+                    <i class="fas fa-star cursor-pointer" data-value="5"></i>
+                </div>
+                <input type="hidden" id="rating-value" name="rating" value="0">
+            </div>
+            <div class="mb-6">
+                <label for="rating-comment" class="block text-sm font-bold mb-2 uppercase tracking-wide">Comments</label>
+                <textarea id="rating-comment" rows="3" class="w-full px-4 py-2 rounded-lg border dark:bg-slate-900 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Optional..."></textarea>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-end gap-3">
+                <button type="button" id="cancel-rating" class="px-6 py-2 rounded-lg border dark:border-slate-700 font-bold">Cancel</button>
+                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Submit Rating</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../scripts/theme.js"></script>
+<script>
+    // Search and Sort functionality
+    const searchBar = document.getElementById('search-bar');
+    const sortList = document.getElementById('sort-list');
+    const serviceProviderGrid = document.getElementById('service-provider-grid');
+    const serviceCards = Array.from(document.querySelectorAll('.service-card'));
+
+    const filterAndSort = () => {
+        const searchTerm = searchBar.value.toLowerCase();
+        const sortValue = sortList.value;
+
+        let filteredCards = serviceCards.filter(card => {
+            const name = card.dataset.name.toLowerCase();
+            const content = card.textContent.toLowerCase();
+            return name.includes(searchTerm) || content.includes(searchTerm);
+        });
+
+        if (sortValue === 'rating') {
+            filteredCards.sort((a, b) => parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating));
+        } else if (sortValue === 'name') {
+            filteredCards.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+        }
+
+        serviceProviderGrid.innerHTML = '';
+        filteredCards.forEach(card => serviceProviderGrid.appendChild(card));
+    };
+
+    searchBar.addEventListener('input', filterAndSort);
+    sortList.addEventListener('change', filterAndSort);
+
+    // Rating Modal functionality
+    const ratingModal = document.getElementById('rating-modal');
+    const rateServiceBtns = document.querySelectorAll('.rate-service');
+    const ratingValueInput = document.getElementById('rating-value');
+    const stars = document.querySelectorAll('#star-rating .fa-star');
+
+    const openModal = (serviceName) => {
+        document.getElementById('modal-service-name').textContent = serviceName;
+        ratingModal.classList.remove('hidden');
+    };
+
+    const closeModal = () => {
+        ratingModal.classList.add('hidden');
+        stars.forEach(s => s.classList.remove('selected'));
+        ratingValueInput.value = "0";
+        document.getElementById('rating-comment').value = '';
+    };
+
+    rateServiceBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const card = e.target.closest('.service-card');
+            openModal(card.dataset.name);
+        });
+    });
+
+    [document.getElementById('close-modal'), document.getElementById('cancel-rating')].forEach(b => b.addEventListener('click', closeModal));
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const val = star.dataset.value;
+            ratingValueInput.value = val;
+            stars.forEach(s => s.classList.toggle('selected', s.dataset.value <= val));
+        });
+    });
+
+    document.getElementById('rating-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Thank you for your rating!');
+        closeModal();
+    });
+
+    filterAndSort(); // Run initial sort
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Digilayn</title>
+    <meta name="author" content="Musa Mgijima">
+    <meta name="description" content="Create a new Digilayn account.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="icon" href="../favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+</head>
+<body class="font-sans antialiased bg-gray-50 dark:bg-slate-900">
+
+<header class="max-w-6xl mx-auto pt-24 pb-16 px-6 text-center">
+    <a href="../index.html" class="text-6xl font-extrabold mb-4 tracking-tight">digilayn</a>
+</header>
+
+<main class="max-w-md mx-auto px-6 pb-24">
+    <div class="card flex flex-col p-8 rounded-2xl border-l-4 border-l-green-500">
+        <h2 class="text-2xl font-bold mb-6 text-center">Create Your Account</h2>
+        <form id="register-form">
+            <div class="mb-4">
+                <input type="text" name="username" placeholder="Username" class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition" required pattern="[a-z0-9]+" title="Username must be lowercase and contain no spaces.">
+                <p class="text-xs opacity-50 mt-1 pl-1">No spaces or uppercase letters.</p>
+            </div>
+            <div class="mb-4">
+                <input type="email" name="email" placeholder="Email" class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition" required>
+            </div>
+            <div class="mb-4">
+                <input type="text" name="display-name" placeholder="Display Name (Optional)" class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition" pattern="[A-Z][a-zA-Z]*( [a-zA-Z]+)?" title="First letter must be capitalized. Only one space allowed.">
+                <p class="text-xs opacity-50 mt-1 pl-1">Optional. First letter capitalized, one space max.</p>
+            </div>
+            <div class="mb-4">
+                <input type="password" name="password" placeholder="Password" class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition" minlength="6" required>
+                <p class="text-xs opacity-50 mt-1 pl-1">Must be 6 or more characters.</p>
+            </div>
+            <div class="mb-6">
+                <input type="password" name="confirm-password" placeholder="Confirm Password" class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition" minlength="6" required>
+            </div>
+            <div class="flex items-center justify-between">
+                <button type="submit" class="w-full px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">
+                    Register
+                </button>
+            </div>
+        </form>
+        <p class="text-center text-sm opacity-70 mt-6">
+            Already have an account? <a href="login.html" class="text-green-500 hover:text-green-700 font-bold">Login</a>.
+        </p>
+    </div>
+</main>
+
+<footer class="text-center py-12 border-t border-gray-100 dark:border-slate-800 opacity-50 text-xs">
+    &copy; 2026 Digilayn. Empowering poortjie economies.
+</footer>
+
+<script src="../scripts/theme.js"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../scripts/firebase.js"></script>
+<script>
+    const registerForm = document.getElementById('register-form');
+    registerForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const username = registerForm.username.value;
+        const email = registerForm.email.value;
+        const displayName = registerForm['display-name'].value;
+        const password = registerForm.password.value;
+        const confirmPassword = registerForm['confirm-password'].value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(userCredential => {
+                const user = userCredential.user;
+                // Now store additional user info in Firestore
+                return db.collection('users').doc(user.uid).set({
+                    username: username,
+                    displayName: displayName,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            })
+            .then(() => {
+                // Registration and data storage successful
+                const redirectUrl = sessionStorage.getItem('redirectUrl');
+                if (redirectUrl) {
+                    sessionStorage.removeItem('redirectUrl');
+                    window.location.href = redirectUrl;
+                } else {
+                    window.location.href = '../index.html'; // Default redirect
+                }
+            })
+            .catch(error => {
+                console.error("Registration failed: ", error);
+                alert(error.message);
+            });
+    });
+</script>
+
+</body>
+</html>
