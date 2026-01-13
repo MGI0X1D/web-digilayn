@@ -101,7 +101,7 @@
                                    ${getStatusBadge(app.status)}
                                 </div>
                                 <p class="text-sm">${app.ownerName} - ${app.phone}</p>
-                                <p class="text-xs text-gray-500">${app.serviceType}</p>
+                                <p class="text-xs text-gray-500">${app.businessType}</p>
                             </div>
                             <div>
                                 ${isPending ? `
@@ -123,22 +123,33 @@
 
     function approveApplication(appId) {
         const appRef = db.doc(`poortjie/applications/listings/${appId}`);
-        // Assuming you have a similar structure for approved businesses
-        const businessRef = db.collection('poortjie').doc('businesses').collection('listings').doc(appId);
+        const servicesRef = db.doc('poortjie/services');
 
         db.runTransaction(async (transaction) => {
             const appDoc = await transaction.get(appRef);
             if (!appDoc.exists) {
                 throw "Application does not exist!";
             }
+            
             const appData = appDoc.data();
-            // You might want to copy data to a separate 'businesses' collection upon approval
-            // For now, just updating status.
+            if (!appData.businessType) {
+                throw "Application is missing a 'businessType' and cannot be approved.";
+            }
+
+            const businessData = { ...appData, status: 'active' };
+            
+            // Using dot notation to update a nested map. Firestore will create the nested objects if they don't exist.
+            const updatePath = `homeScreen.${appData.businessType}.data.${appId}`;
+            transaction.update(servicesRef, { [updatePath]: businessData });
+            
+            // Update the original application's status
             transaction.update(appRef, { status: 'approved' });
+
         }).then(() => {
-            console.log("Application approved!");
+            console.log("Application approved and business listing created!");
         }).catch(error => {
             console.error("Error approving application: ", error);
+            alert("Error approving application: " + error);
         });
     }
 

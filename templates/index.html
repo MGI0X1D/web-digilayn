@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digilayn | Poortjie Services</title>
+    <meta name="author" content="Musa Mgijima">
+    <meta name="description" content="Digilayn connects you with local Kasi services: From school transport and tow trucks to professional designers and web developers.">
+    <meta name="keywords" content="Poortjie, Kasi services, transport, school transport, graphic design, web development, South Africa, Digilayn">
+    <meta name="copyright" content="© 2026 Digilayn. All rights reserved.">
+    <meta name="robots" content="index,follow">
+    <meta name="theme-color" content="#22c55e">
+
+    <link rel="icon" href="favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body class="font-sans antialiased">
+
+<div class="fixed top-5 right-5 z-50" id="user-controls">
+    <button id="theme-toggle" class="px-4 py-2 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition flex items-center gap-2 hidden">
+        <span id="theme-icon">🌓</span> <span class="text-xs font-bold uppercase tracking-widest text-[10px]">Mode</span>
+    </button>
+
+    <div id="hamburger-menu" class="hidden relative">
+        <button id="hamburger-btn" class="p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <div id="menu-items" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
+            <button id="menu-theme-toggle" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3">
+                <span id="menu-theme-icon">🌓</span> Mode
+            </button>
+            <a id="admin-link" href="admin/admin.html" class="hidden block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Admin</a>
+            <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</button>
+        </div>
+    </div>
+</div>
+
+<header class="max-w-6xl mx-auto pt-24 pb-16 px-6 text-center">
+    <div class="mb-4 flex justify-center">
+        <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase">Poortjie Services</div>
+    </div>
+    <h1 class="text-6xl font-extrabold mb-4 tracking-tight">digilayn</h1>
+    <p class="text-xl opacity-80 max-w-2xl mx-auto leading-relaxed">
+        The digital heartbeat of the township. Access reliable transport, professional designers, and expert developers—all in one place.
+    </p>
+
+    <div class="flex flex-wrap justify-center gap-4 mt-8">
+        <a href="#services" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">Explore Services</a>
+        <a href="services/business-form.html" class="px-8 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">List Your Business</a>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-24" id="services">
+
+    <div class="grid md:grid-cols-3 gap-8">
+
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-green-500"></span> Transport
+            </h2>
+
+            <div class="card flex flex-col p-6 rounded-2xl border-l-4 border-l-green-500">
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold mb-2">Ride & Delivery</h3>
+                    <p class="text-sm opacity-70 mb-4">Local cabs, school transport, tow trucks, and bike deliveries.</p>
+                    <ul class="space-y-2 text-sm font-medium">
+                        <li class="flex items-center gap-2">🟢 School Shuttles</li>
+                        <li class="flex items-center gap-2">🟢 Emergency Towing</li>
+                        <li class="flex items-center gap-2">🟢 Bike "Fetch-it" Services</li>
+                    </ul>
+                </div>
+                <a href="services/transport.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Find a Ride</a>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-green-500"></span> Creative
+            </h2>
+
+            <div class="card flex flex-col p-6 rounded-2xl border-l-4 border-l-green-500">
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold mb-2">Designers</h3>
+                    <p class="text-sm opacity-70 mb-4">Local talent to make your brand or event stand out.</p>
+                    <ul class="space-y-2 text-sm font-medium">
+                        <li class="flex items-center gap-2">🎨 Poster & Flyer Design</li>
+                        <li class="flex items-center gap-2">🎨 Brand Logo Identity</li>
+                        <li class="flex items-center gap-2">🎨 Social Media Content</li>
+                    </ul>
+                </div>
+                <a href="services/designers.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Hire a Designer</a>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-green-500"></span> Technical
+            </h2>
+
+            <div class="card flex flex-col p-6 rounded-2xl border-l-4 border-l-green-500">
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold mb-2">Developers</h3>
+                    <p class="text-sm opacity-70 mb-4">Build your digital presence with local tech experts.</p>
+                    <ul class="space-y-2 text-sm font-medium">
+                        <li class="flex items-center gap-2">💻 Custom Website Dev</li>
+                        <li class="flex items-center gap-2">💻 Android/iOS Mobile Apps</li>
+                        <li class="flex items-center gap-2">💻 Technical Support</li>
+                    </ul>
+                </div>
+                <a href="services/developers.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Contact Devs</a>
+            </div>
+        </section>
+        
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-green-500"></span> Food & Catering
+            </h2>
+
+            <div class="card flex flex-col p-6 rounded-2xl border-l-4 border-l-green-500">
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold mb-2">Local Flavours</h3>
+                    <p class="text-sm opacity-70 mb-4">From street food to private catering for your events.</p>
+                    <ul class="space-y-2 text-sm font-medium">
+                        <li class="flex items-center gap-2">🍲 Daily Meals & Platters</li>
+                        <li class="flex items-center gap-2">🎂 Custom Cakes & Bakes</li>
+                        <li class="flex items-center gap-2">🔥 Shisanyama & Braai Services</li>
+                    </ul>
+                </div>
+                <a href="services/food.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Order Now</a>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-green-500"></span> Auto Care
+            </h2>
+
+            <div class="card flex flex-col p-6 rounded-2xl border-l-4 border-l-green-500">
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold mb-2">Mobile Car Wash</h3>
+                    <p class="text-sm opacity-70 mb-4">Get your car cleaned at your home or work.</p>
+                    <ul class="space-y-2 text-sm font-medium">
+                        <li class="flex items-center gap-2">🧼 Exterior & Interior</li>
+                        <li class="flex items-center gap-2">✨ Waxing and Polishing</li>
+                        <li class="flex items-center gap-2">💺 Upholstery Cleaning</li>
+                    </ul>
+                </div>
+                <a href="services/car-wash.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Book a Wash</a>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h2 class="text-2xl font-bold flex items-center gap-3">
+                <span class="w-8 h-1 bg-green-500"></span> Home & Decor
+            </h2>
+
+            <div class="card flex flex-col p-6 rounded-2xl border-l-4 border-l-green-500">
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold mb-2">Local Artisans</h3>
+                    <p class="text-sm opacity-70 mb-4">Custom furniture and interior designs for your home.</p>
+                    <ul class="space-y-2 text-sm font-medium">
+                        <li class="flex items-center gap-2">🛠️ Custom TV Stands</li>
+                        <li class="flex items-center gap-2">🛠️ Modern Ceiling Designs</li>
+                        <li class="flex items-center gap-2">🛠️ Built-in Cupboards</li>
+                    </ul>
+                </div>
+                <a href="services/artisans.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Find a Craftsman</a>
+            </div>
+        </section>
+
+    </div>
+
+    <section class="mt-24 card p-10 rounded-3xl bg-gradient-to-br from-green-50 to-transparent dark:from-green-900/10">
+        <div class="max-w-3xl">
+            <h2 class="text-3xl font-bold mb-4">Built for the community.</h2>
+            <p class="text-lg opacity-80 mb-6">
+                Digilayn uses cost-effective, modern architecture (like pure HTML, CSS and JavaScript) to ensure that even the smallest local business has a high-performance home online.
+            </p>
+            <div class="flex gap-4">
+                <span class="text-[10px] font-bold px-2 py-1 border border-green-500/30 rounded text-green-500 uppercase tracking-widest">Mobile First</span>
+                <span class="text-[10px] font-bold px-2 py-1 border border-green-500/30 rounded text-green-500 uppercase tracking-widest">Kasi Focused</span>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="text-center py-12 border-t border-gray-100 dark:border-slate-800 opacity-50 text-xs">
+    &copy; 2026 Digilayn. Empowering poortjie economies.
+</footer>
+
+<script src="scripts/theme.js"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="scripts/firebase.js"></script>
+
+<script>
+
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const menuItems = document.getElementById('menu-items');
+    const menuThemeToggle = document.getElementById('menu-theme-toggle');
+    const logoutBtn = document.getElementById('logout-btn');
+    const adminLink = document.getElementById('admin-link');
+
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuItems.classList.toggle('hidden');
+    });
+
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            // User is logged in
+            themeToggle.classList.add('hidden');
+            hamburgerMenu.classList.remove('hidden');
+
+            firebase.firestore().collection('users').doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    const isSuperUser = userData.roles?.digilayn?.isSuperUser === true;
+
+                    if (isSuperUser) {
+                        adminLink.classList.remove('hidden');
+                    } else {
+                        adminLink.classList.add('hidden');
+                    }
+                } else {
+                    adminLink.classList.add('hidden');
+                }
+            }).catch((error) => {
+                console.error("Error checking superuser status:", error);
+                adminLink.classList.add('hidden');
+            });
+        } else {
+            // User is logged out
+            themeToggle.classList.remove('hidden');
+            hamburgerMenu.classList.add('hidden');
+            menuItems.classList.add('hidden'); // Hide menu on logout
+            adminLink.classList.add('hidden');
+        }
+    });
+
+    window.addEventListener('click', function(e) {
+        if (!hamburgerMenu.contains(e.target)) {
+            menuItems.classList.add('hidden');
+        }
+    });
+
+    menuThemeToggle.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent window click listener from closing menu
+        // Assuming theme.js listens for a click on themeToggle
+        themeToggle.click();
+        // Also update the icon in the menu
+        const menuThemeIcon = document.getElementById('menu-theme-icon');
+        if (menuThemeIcon && themeIcon) {
+            menuThemeIcon.textContent = themeIcon.textContent;
+        }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        firebase.auth().signOut().then(() => {
+            // Sign-out successful.
+            // onAuthStateChanged will handle the UI changes.
+        }).catch((error) => {
+            // An error happened.
+            console.error('Sign out error', error);
+        });
+    });
+
+    const themeIconObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                const menuThemeIcon = document.getElementById('menu-theme-icon');
+                if(menuThemeIcon) {
+                    menuThemeIcon.textContent = mutation.target.textContent;
+                }
+            }
+        });
+    });
+    if (themeIcon) {
+        themeIconObserver.observe(themeIcon, { characterData: true, childList: true, subtree: true });
+    }
+</script>
+
+<script>
+    console.log("website developed by Musa Mgijima");
+</script>
+
+</body>
+</html>

@@ -116,11 +116,24 @@
         addRatingButtonListeners();
     };
 
-    db.collection('poortjie').doc('services').collection('transport').get()
-        .then(snapshot => {
-            const providers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            renderProviders(providers);
-            filterAndSort();
+    db.collection('poortjie').doc('services').get()
+        .then(doc => {
+            if (doc.exists) {
+                const homeScreenData = doc.data().homeScreen;
+                const transportData = homeScreenData.Transport.data;
+                if (transportData && typeof transportData === 'object') {
+                    const providers = Object.keys(transportData).map(key => ({
+                        id: key,
+                        ...transportData[key]
+                    }));
+                    renderProviders(providers);
+                    filterAndSort();
+                } else {
+                    serviceProviderGrid.innerHTML = '<p>No transport services found.</p>';
+                }
+            } else {
+                 serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+            }
         })
         .catch(error => {
             console.error("Error fetching services: ", error);
