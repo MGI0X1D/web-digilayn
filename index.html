@@ -21,10 +21,22 @@
 </head>
 <body class="font-sans antialiased">
 
-<div class="fixed top-5 right-5 z-50 flex gap-2">
-    <button id="theme-toggle" class="px-4 py-2 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition flex items-center gap-2">
+<div class="fixed top-5 right-5 z-50" id="user-controls">
+    <button id="theme-toggle" class="px-4 py-2 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition flex items-center gap-2 hidden">
         <span id="theme-icon">🌓</span> <span class="text-xs font-bold uppercase tracking-widest text-[10px]">Mode</span>
     </button>
+
+    <div id="hamburger-menu" class="hidden relative">
+        <button id="hamburger-btn" class="p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <div id="menu-items" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
+            <button id="menu-theme-toggle" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3">
+                <span id="menu-theme-icon">🌓</span> Mode
+            </button>
+            <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</button>
+        </div>
+    </div>
 </div>
 
 <header class="max-w-6xl mx-auto pt-24 pb-16 px-6 text-center">
@@ -80,7 +92,7 @@
                         <li class="flex items-center gap-2">🎨 Social Media Content</li>
                     </ul>
                 </div>
-                <a href="designers.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Hire a Designer</a>
+                <a href="services/designers.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Hire a Designer</a>
             </div>
         </section>
 
@@ -99,7 +111,7 @@
                         <li class="flex items-center gap-2">💻 Technical Support</li>
                     </ul>
                 </div>
-                <a href="developers.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Contact Devs</a>
+                <a href="services/developers.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Contact Devs</a>
             </div>
         </section>
         
@@ -118,7 +130,7 @@
                         <li class="flex items-center gap-2">🔥 Shisanyama & Braai Services</li>
                     </ul>
                 </div>
-                <a href="food.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Order Now</a>
+                <a href="services/food.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Order Now</a>
             </div>
         </section>
 
@@ -137,7 +149,7 @@
                         <li class="flex items-center gap-2">💺 Upholstery Cleaning</li>
                     </ul>
                 </div>
-                <a href="car-wash.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Book a Wash</a>
+                <a href="services/car-wash.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Book a Wash</a>
             </div>
         </section>
 
@@ -156,7 +168,7 @@
                         <li class="flex items-center gap-2">🛠️ Built-in Cupboards</li>
                     </ul>
                 </div>
-                <a href="artisans.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Find a Craftsman</a>
+                <a href="services/artisans.html" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Find a Craftsman</a>
             </div>
         </section>
 
@@ -166,7 +178,7 @@
         <div class="max-w-3xl">
             <h2 class="text-3xl font-bold mb-4">Built for the community.</h2>
             <p class="text-lg opacity-80 mb-6">
-                Digilayn uses cost-effective, modern architecture (like pure HTML, CSS and Javascript) to ensure that even the smallest local business has a high-performance home online.
+                Digilayn uses cost-effective, modern architecture (like pure HTML, CSS and JavaScript) to ensure that even the smallest local business has a high-performance home online.
             </p>
             <div class="flex gap-4">
                 <span class="text-[10px] font-bold px-2 py-1 border border-green-500/30 rounded text-green-500 uppercase tracking-widest">Mobile First</span>
@@ -188,6 +200,74 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="scripts/firebase.js"></script>
+
+<script>
+
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const menuItems = document.getElementById('menu-items');
+    const menuThemeToggle = document.getElementById('menu-theme-toggle');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuItems.classList.toggle('hidden');
+    });
+
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            // User is logged in
+            themeToggle.classList.add('hidden');
+            hamburgerMenu.classList.remove('hidden');
+        } else {
+            // User is logged out
+            themeToggle.classList.remove('hidden');
+            hamburgerMenu.classList.add('hidden');
+            menuItems.classList.add('hidden'); // Hide menu on logout
+        }
+    });
+
+    window.addEventListener('click', function(e) {
+        if (!hamburgerMenu.contains(e.target)) {
+            menuItems.classList.add('hidden');
+        }
+    });
+
+    menuThemeToggle.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent window click listener from closing menu
+        // Assuming theme.js listens for a click on themeToggle
+        themeToggle.click();
+        // Also update the icon in the menu
+        const menuThemeIcon = document.getElementById('menu-theme-icon');
+        if (menuThemeIcon && themeIcon) {
+            menuThemeIcon.textContent = themeIcon.textContent;
+        }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        firebase.auth().signOut().then(() => {
+            // Sign-out successful.
+            // onAuthStateChanged will handle the UI changes.
+        }).catch((error) => {
+            // An error happened.
+            console.error('Sign out error', error);
+        });
+    });
+
+    const themeIconObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                const menuThemeIcon = document.getElementById('menu-theme-icon');
+                if(menuThemeIcon) {
+                    menuThemeIcon.textContent = mutation.target.textContent;
+                }
+            }
+        });
+    });
+    if (themeIcon) {
+        themeIconObserver.observe(themeIcon, { characterData: true, childList: true, subtree: true });
+    }
+</script>
 
 <script>
     console.log("website developed by Musa Mgijima");

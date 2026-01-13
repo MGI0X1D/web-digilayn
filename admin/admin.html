@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Digilayn</title>
+    <meta name="robots" content="noindex, nofollow"> <!-- Prevents search engines from indexing this page -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="icon" href="../favicon/favicon.ico">
+</head>
+<body class="font-sans antialiased bg-gray-50 dark:bg-slate-900">
+
+<div id="admin-content" class="hidden">
+    <header class="max-w-6xl mx-auto pt-24 pb-16 px-6">
+        <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Admin Dashboard</h1>
+        <p class="text-xl opacity-80">Welcome, Super User!</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        <div class="card p-8 rounded-2xl">
+            <h2 class="text-2xl font-bold mb-6">Admin Actions</h2>
+            <!-- Add your admin-specific content here -->
+            <p>Here you can manage users, services, and other parts of the application.</p>
+        </div>
+    </main>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../scripts/firebase.js"></script>
+
+<script>
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            // User is logged in, check if they are a super user.
+            const userRef = db.collection('users').doc(user.uid);
+            userRef.get().then((doc) => {
+                if (doc.exists && doc.data().isSuperUser === true) {
+                    // User is a super user, show the admin content.
+                    document.getElementById('admin-content').classList.remove('hidden');
+                } else {
+                    // User is not a super user, redirect them.
+                    alert('Access denied. You are not authorized to view this page.');
+                    window.location.replace('../index.html');
+                }
+            }).catch((error) => {
+                console.error("Error getting user data:", error);
+                alert('An error occurred while verifying your permissions.');
+                window.location.replace('../index.html');
+            });
+        } else {
+            // No user is logged in, redirect them.
+            alert('You must be logged in to access this page.');
+            // Save the current URL to redirect back to after login
+            sessionStorage.setItem('redirectUrl', window.location.href);
+            window.location.href = '../authentication/login.html';
+        }
+    });
+</script>
+
+</body>
+</html>

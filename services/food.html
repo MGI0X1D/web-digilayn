@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digilayn | Transport Services</title>
+    <title>Digilayn | Food & Catering Services</title>
     <meta name="author" content="Musa Mgijima">
-    <meta name="description" content="Find reliable and affordable transport services in Poortjie, from school shuttles to emergency towing.">
-    <meta name="keywords" content="Poortjie, transport, school transport, towing, delivery, Kasi services, Digilayn">
+    <meta name="description" content="Find reliable and affordable food and catering services in Poortjie, from street food to private catering.">
+    <meta name="keywords" content="Poortjie, food, catering, local food, events, Kasi services, Digilayn">
     <meta name="copyright" content="© 2026 Digilayn. All rights reserved.">
     <meta name="robots" content="index,follow">
     <meta name="theme-color" content="#22c55e">
@@ -36,7 +36,7 @@
 <header class="max-w-6xl mx-auto pt-20 pb-12 px-6">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-            <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase inline-block">Transport</div>
+            <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase inline-block">Food & Catering</div>
             <h1 class="text-4xl md:text-6xl font-extrabold mt-2 tracking-tight">Service Providers</h1>
         </div>
         <a href="../index.html" class="w-full md:w-auto text-center px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition whitespace-nowrap">
@@ -116,7 +116,7 @@
         addRatingButtonListeners();
     };
 
-    db.collection('poortjie').doc('services').collection('transport').get()
+    db.collection('poortjie').doc('services').collection('food').get()
         .then(snapshot => {
             const providers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderProviders(providers);
