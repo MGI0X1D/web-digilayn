@@ -150,7 +150,7 @@
 
     auth.onAuthStateChanged(user => {
         if (user) {
-            const applicationsRef = db.collection('poortjie').doc('applications').collection(user.uid);
+            const applicationsRef = db.collection('poortjie').doc('applications').collection('listings').where('userId', '==', user.uid);
             
             applicationsRef.orderBy('createdAt', 'desc').get().then(snapshot => {
                 let pendingApplicationData = null;
@@ -219,7 +219,8 @@
         }
 
         const businessData = {
-            ownerId: user.uid,
+            userId: user.uid,
+            userEmail: user.email,
             ownerName: ownerNameInput.value,
             email: emailInput.value,
             phone: phoneInput.value,
@@ -230,7 +231,7 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        db.collection('poortjie').doc('applications').collection(user.uid).add(businessData)
+        db.collection('poortjie').doc('applications').collection('listings').add(businessData)
             .then(() => {
                 hideLoader();
                 alert('Thank you! Your business has been submitted successfully.');

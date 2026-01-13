@@ -19,14 +19,13 @@
 
     <main class="max-w-6xl mx-auto px-6 pb-24">
         <div class="card p-8 rounded-2xl">
-            <h2 class="text-2xl font-bold mb-6">Admin Actions</h2>
-            <!-- Add your admin-specific content here -->
-            <p>Here you can manage users, services, and other parts of the application.</p>
+            <h2 class="text-2xl font-bold mb-6">Business Applications</h2>
+            <div id="applications-list" class="space-y-4">
+            </div>
         </div>
     </main>
 </div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -35,15 +34,12 @@
 <script>
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
-            // User is logged in, check if they are a super user.
             const userRef = db.collection('users').doc(user.uid);
             userRef.get().then((doc) => {
-                if (doc.exists && doc.data().isSuperUser === true) {
-                    // User is a super user, show the admin content.
+                if (doc.exists && doc.data().roles?.digilayn?.isSuperUser === true) {
                     document.getElementById('admin-content').classList.remove('hidden');
+                    loadApplications();
                 } else {
-                    // User is not a super user, redirect them.
-                    alert('Access denied. You are not authorized to view this page.');
                     window.location.replace('../index.html');
                 }
             }).catch((error) => {
@@ -53,12 +49,108 @@
             });
         } else {
             // No user is logged in, redirect them.
-            alert('You must be logged in to access this page.');
-            // Save the current URL to redirect back to after login
             sessionStorage.setItem('redirectUrl', window.location.href);
             window.location.href = '../authentication/login.html';
         }
     });
+
+    function getStatusBadge(status) {
+        switch (status) {
+            case 'approved':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Approved</span>`;
+            case 'rejected':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Rejected</span>`;
+            default:
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-200">Pending</span>`;
+        }
+    }
+
+    function loadApplications() {
+        const applicationsList = document.getElementById('applications-list');
+        const applicationsRef = db.collection('poortjie').doc('applications').collection('listings');
+
+        applicationsRef.onSnapshot(snapshot => {
+            if (snapshot.empty) {
+                applicationsList.innerHTML = '<p>No applications found.</p>';
+                return;
+            }
+
+            const applicationsByUser = {};
+            snapshot.forEach(doc => {
+                const app = doc.data();
+                const userEmail = app.userEmail || 'Unknown User';
+                if (!applicationsByUser[userEmail]) {
+                    applicationsByUser[userEmail] = [];
+                }
+                applicationsByUser[userEmail].push({ id: doc.id, ...app });
+            });
+
+            let html = '';
+            for (const userEmail in applicationsByUser) {
+                html += `
+                    <div class="user-group mb-6">
+                        <h3 class="text-xl font-semibold mb-3 border-b pb-2">${userEmail}</h3>
+                `;
+                applicationsByUser[userEmail].forEach(app => {
+                    const isPending = !app.status || app.status === 'pending';
+                    html += `
+                        <div class="p-4 border rounded-lg flex justify-between items-center mb-2">
+                            <div>
+                                <div class="flex items-center gap-x-3">
+                                   <h4 class="font-bold">${app.businessName}</h4>
+                                   ${getStatusBadge(app.status)}
+                                </div>
+                                <p class="text-sm">${app.ownerName} - ${app.phone}</p>
+                                <p class="text-xs text-gray-500">${app.serviceType}</p>
+                            </div>
+                            <div>
+                                ${isPending ? `
+                                <button onclick="approveApplication('${app.id}')" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Approve</button>
+                                <button onclick="rejectApplication('${app.id}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 ml-2">Reject</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            applicationsList.innerHTML = html;
+        }, error => {
+            console.error("Error loading applications:", error);
+            applicationsList.innerHTML = '<p>Error loading applications. Check console for details.</p>';
+        });
+    }
+
+    function approveApplication(appId) {
+        const appRef = db.doc(`poortjie/applications/listings/${appId}`);
+        // Assuming you have a similar structure for approved businesses
+        const businessRef = db.collection('poortjie').doc('businesses').collection('listings').doc(appId);
+
+        db.runTransaction(async (transaction) => {
+            const appDoc = await transaction.get(appRef);
+            if (!appDoc.exists) {
+                throw "Application does not exist!";
+            }
+            const appData = appDoc.data();
+            // You might want to copy data to a separate 'businesses' collection upon approval
+            // For now, just updating status.
+            transaction.update(appRef, { status: 'approved' });
+        }).then(() => {
+            console.log("Application approved!");
+        }).catch(error => {
+            console.error("Error approving application: ", error);
+        });
+    }
+
+    function rejectApplication(appId) {
+        if (confirm('Are you sure you want to reject this application?')) {
+            db.doc(`poortjie/applications/listings/${appId}`).update({ status: 'rejected' }).then(() => {
+                console.log("Application rejected!");
+            }).catch(error => {
+                console.error("Error rejecting application: ", error);
+            });
+        }
+    }
 </script>
 
 </body>

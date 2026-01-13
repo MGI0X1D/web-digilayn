@@ -34,6 +34,7 @@
             <button id="menu-theme-toggle" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3">
                 <span id="menu-theme-icon">🌓</span> Mode
             </button>
+            <a id="admin-link" href="admin/admin.html" class="hidden block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Admin</a>
             <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</button>
         </div>
     </div>
@@ -208,6 +209,7 @@
     const menuItems = document.getElementById('menu-items');
     const menuThemeToggle = document.getElementById('menu-theme-toggle');
     const logoutBtn = document.getElementById('logout-btn');
+    const adminLink = document.getElementById('admin-link');
 
     hamburgerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -219,11 +221,30 @@
             // User is logged in
             themeToggle.classList.add('hidden');
             hamburgerMenu.classList.remove('hidden');
+
+            firebase.firestore().collection('users').doc(user.uid).get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    const isSuperUser = userData.roles?.digilayn?.isSuperUser === true;
+
+                    if (isSuperUser) {
+                        adminLink.classList.remove('hidden');
+                    } else {
+                        adminLink.classList.add('hidden');
+                    }
+                } else {
+                    adminLink.classList.add('hidden');
+                }
+            }).catch((error) => {
+                console.error("Error checking superuser status:", error);
+                adminLink.classList.add('hidden');
+            });
         } else {
             // User is logged out
             themeToggle.classList.remove('hidden');
             hamburgerMenu.classList.add('hidden');
             menuItems.classList.add('hidden'); // Hide menu on logout
+            adminLink.classList.add('hidden');
         }
     });
 
