@@ -10,12 +10,70 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.id === 'close-modal') closeModal();
             if (e.target.classList.contains('star')) handleStarClick(e);
             if (e.target.id === 'submit-rating') handleSubmit();
+            
+            // Handle Like button click (using closest to catch icon clicks too)
+            const likeBtn = e.target.closest('.like-comment-btn');
+            if (likeBtn) handleLikeClick(likeBtn);
         });
 
         // Listen for Firebase auth state changes
         firebase.auth().onAuthStateChanged(user => {
             currentUser = user;
         });
+    };
+
+    // --- Like Comment Action ---
+    const handleLikeClick = async (btn) => {
+        if (!currentUser) {
+            sessionStorage.setItem('redirectUrl', window.location.href);
+            window.location.href = '../authentication/login.html';
+            return;
+        }
+
+        // Prevent multiple rapid clicks
+        if (btn.disabled) return;
+        btn.disabled = true;
+
+        const commentUid = btn.dataset.commentUid;
+        const sId = btn.dataset.serviceId;
+        const sKey = btn.dataset.serviceKey;
+
+        const serviceRef = db.collection('poortjie').doc('services');
+        const likesPath = `homeScreen.${sKey}.data.${sId}.ratings.${commentUid}.likes`;
+
+        try {
+            // Optimistic UI update
+            const icon = btn.querySelector('i');
+            const countSpan = btn.querySelector('.likes-count');
+            let count = parseInt(countSpan.textContent);
+            const isLiked = icon.classList.contains('fas'); // fas means liked (heart filled)
+
+            if (isLiked) {
+                // Unlike
+                icon.className = 'far fa-heart';
+                btn.classList.remove('text-red-500');
+                btn.classList.add('opacity-60');
+                countSpan.textContent = Math.max(0, count - 1);
+                
+                await serviceRef.update({
+                    [`${likesPath}.${currentUser.uid}`]: firebase.firestore.FieldValue.delete()
+                });
+            } else {
+                // Like
+                icon.className = 'fas fa-heart text-red-500';
+                btn.classList.add('text-red-500');
+                btn.classList.remove('opacity-60');
+                countSpan.textContent = count + 1;
+
+                await serviceRef.update({
+                    [`${likesPath}.${currentUser.uid}`]: true
+                });
+            }
+        } catch (error) {
+            console.error("Error toggling like:", error);
+        } finally {
+            btn.disabled = false;
+        }
     };
 
     // --- Modal Control & Data Loading ---
@@ -81,15 +139,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const commentsList = document.getElementById('comments-list');
         if (!commentsList) return; // Guard if element doesn't exist in HTML
 
-        // Sort by timestamp descending (newest first)
+        // Sort by likes descending, then by timestamp descending
         const sorted = [...commentsToRender].sort((a, b) => {
+            const likesA = a.likes ? Object.keys(a.likes).length : 0;
+            const likesB = b.likes ? Object.keys(b.likes).length : 0;
+
+            if (likesB !== likesA) return likesB - likesA;
+
             const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
             const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
             return timeB - timeA;
         });
 
-        commentsList.innerHTML = sorted.length > 0 ? sorted.map(c => `
-            <div class="p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 mb-2">
+        commentsList.innerHTML = sorted.length > 0 ? sorted.map(c => {
+            const likesCount = c.likes ? Object.keys(c.likes).length : 0;
+            const isLiked = currentUser && c.likes && c.likes[currentUser.uid];
+            const likeIconClass = isLiked ? 'fas fa-heart text-red-500' : 'far fa-heart';
+
+            return `
+            <div class="p-3 rounded-lg bg-slate-100 dark:bg-slate-700/50 mb-2 relative group">
                 <div class="flex justify-between items-start mb-1">
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-sm">${c.userId === currentUser?.uid ? 'You' : 'Anonymous'}</span>
@@ -97,10 +165,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${'★'.repeat(c.rating)}${'☆'.repeat(5 - c.rating)}
                         </div>
                     </div>
+                    <button class="like-comment-btn flex items-center gap-1 text-xs transition-colors hover:text-red-500 ${isLiked ? 'text-red-500' : 'opacity-60'}" 
+                            data-comment-uid="${c.userId}" 
+                            data-service-id="${serviceId}" 
+                            data-service-key="${serviceKey}">
+                        <i class="${likeIconClass}"></i>
+                        <span class="likes-count">${likesCount}</span>
+                    </button>
                 </div>
                 ${c.comment ? `<p class="text-sm text-slate-800 dark:text-slate-200 italic">"${c.comment}"</p>` : ''}
             </div>
-        `).join('') : '<p class="text-sm text-center text-slate-500">No ratings yet.</p>';
+        `;}).join('') : '<p class="text-sm text-center text-slate-500">No ratings yet.</p>';
     };
 
     const handleStarClick = (e) => {
