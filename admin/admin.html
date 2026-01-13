@@ -6,10 +6,15 @@
     <title>Admin Dashboard | Digilayn</title>
     <meta name="robots" content="noindex, nofollow"> <!-- Prevents search engines from indexing this page -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="icon" href="../favicon/favicon.ico">
 </head>
-<body class="font-sans antialiased bg-gray-50 dark:bg-slate-900">
+<body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
 
 <div id="admin-content" class="hidden">
     <header class="max-w-6xl mx-auto pt-24 pb-16 px-6">
@@ -26,6 +31,7 @@
     </main>
 </div>
 
+<script src="../scripts/theme.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>

@@ -4,7 +4,7 @@
     --card-bg: #f8fafc;
     --border-color: #e2e8f0;
 }
-.dark {
+html.dark {
     --bg-color: #0f172a;
     --text-color: #f1f5f9;
     --card-bg: #1e293b;

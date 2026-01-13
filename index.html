@@ -17,9 +17,14 @@
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <link rel="stylesheet" href="styles/main.css">
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
 
 <div class="fixed top-5 right-5 z-50" id="user-controls">
     <button id="theme-toggle" class="px-4 py-2 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition flex items-center gap-2 hidden">
@@ -57,6 +62,17 @@
 
 <main class="max-w-6xl mx-auto px-6 pb-24" id="services">
 
+    <div class="mb-12 flex flex-col md:flex-row gap-4">
+        <div class="relative flex-grow">
+            <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="search-bar" placeholder="Search categories..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div>
+        <select id="sort-list" class="px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="asc">Name (A-Z)</option>
+            <option value="desc">Name (Z-A)</option>
+        </select>
+    </div>
+
     <div id="services-grid" class="grid md:grid-cols-3 gap-8">
     </div>
 
@@ -86,6 +102,8 @@
 <script src="scripts/firebase.js"></script>
 
 <script>
+    let allServices = [];
+
     function renderCards(servicesData) {
         if (!servicesData) return;
         const grid = document.getElementById('services-grid');
@@ -108,12 +126,32 @@
         `).join('');
     }
 
+    function filterAndSort() {
+        const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+        const sortValue = document.getElementById('sort-list').value;
+
+        let filtered = allServices.filter(service => 
+            service.category.toLowerCase().includes(searchTerm) || 
+            service.title.toLowerCase().includes(searchTerm) ||
+            service.description.toLowerCase().includes(searchTerm)
+        );
+
+        if (sortValue === 'asc') {
+            filtered.sort((a, b) => a.category.localeCompare(b.category));
+        } else if (sortValue === 'desc') {
+            filtered.sort((a, b) => b.category.localeCompare(a.category));
+        }
+
+        renderCards(filtered);
+    }
+
     function fetchAndRenderServices() {
         // 1. Try to load from cache first for instant UI
         try {
             const cachedServices = sessionStorage.getItem('servicesCache');
             if (cachedServices) {
-                renderCards(JSON.parse(cachedServices));
+                allServices = JSON.parse(cachedServices);
+                filterAndSort();
             }
         } catch (e) {
             console.error("Could not read from sessionStorage:", e);
@@ -125,7 +163,7 @@
             if (doc.exists) {
                 const homeScreenData = doc.data().homeScreen;
                 if (homeScreenData && typeof homeScreenData === 'object') {
-                    const services = Object.keys(homeScreenData).map(key => {
+                    allServices = Object.keys(homeScreenData).map(key => {
                         const service = homeScreenData[key];
                         return {
                             category: key,
@@ -138,20 +176,22 @@
                     });
                     
                     // 3. Render the latest data and update cache
-                    renderCards(services);
+                    filterAndSort();
                     try {
-                        sessionStorage.setItem('servicesCache', JSON.stringify(services));
+                        sessionStorage.setItem('servicesCache', JSON.stringify(allServices));
                     } catch (e) {
                         console.error("Could not write to sessionStorage:", e);
                     }
 
                 } else {
                     console.log("'homeScreen' data not found or is not an object.");
-                    renderCards([]);
+                    allServices = [];
+                    filterAndSort();
                 }
             } else {
                 console.log("No 'services' document found!");
-                renderCards([]);
+                allServices = [];
+                filterAndSort();
             }
         }).catch((error) => {
             console.error("Error fetching services:", error);
@@ -163,9 +203,11 @@
     window.onload = () => {
         fetchAndRenderServices();
 
+        document.getElementById('search-bar').addEventListener('input', filterAndSort);
+        document.getElementById('sort-list').addEventListener('change', filterAndSort);
+
         // AUTH & UI SCRIPTS
         const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = document.getElementById('theme-icon');
         const hamburgerMenu = document.getElementById('hamburger-menu');
         const hamburgerBtn = document.getElementById('hamburger-btn');
         const menuItems = document.getElementById('menu-items');
@@ -197,7 +239,6 @@
             if (hamburgerMenu && !hamburgerMenu.contains(e.target)) menuItems.classList.add('hidden');
         };
 
-        menuThemeToggle.onclick = () => themeToggle.click();
         logoutBtn.onclick = () => firebase.auth().signOut();
     };
 
