@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Routes | Poortjie Services</title>
+    <meta name="description" content="Check local taxi routes, fares, and operating hours in Poortjie.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+
+<header class="max-w-6xl mx-auto pt-20 pb-12 px-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase inline-block">Transport</div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mt-2 tracking-tight">Taxi Routes</h1>
+        </div>
+        <a href="../home.html" onclick="window.location.replace('../home.html'); return false;" class="w-full md:w-auto text-center px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition whitespace-nowrap">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+        </a>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-24">
+    <div id="routes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Routes will be injected here -->
+        <div class="col-span-full text-center py-12">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mb-4"></div>
+            <p>Loading routes...</p>
+        </div>
+    </div>
+</main>
+
+<footer class="text-center py-12 border-t border-gray-100 dark:border-slate-800 opacity-50 text-xs">
+    &copy; 2026 Poortjie Services. Empowering Poortjie economies.
+</footer>
+
+<script src="../scripts/theme.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../scripts/firebase.js"></script>
+
+<script>
+    const routesGrid = document.getElementById('routes-grid');
+
+    async function fetchRoutes() {
+        try {
+            const doc = await db.collection('poortjie').doc('taxi_routes').get();
+            if (doc.exists && doc.data().routes) {
+                renderRoutes(doc.data().routes);
+            } else {
+                routesGrid.innerHTML = '<p class="col-span-full text-center py-12 opacity-60">No taxi routes found.</p>';
+            }
+        } catch (error) {
+            console.error("Error fetching routes:", error);
+            routesGrid.innerHTML = '<p class="col-span-full text-center py-12 text-red-500">Failed to load routes. Please try again later.</p>';
+        }
+    }
+
+    function renderRoutes(routes) {
+        routesGrid.innerHTML = '';
+        Object.keys(routes).forEach(key => {
+            const route = routes[key];
+            const card = document.createElement('div');
+            card.className = 'card p-6 rounded-2xl border-l-4 border-l-green-500 flex flex-col shadow-sm hover:shadow-md transition';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold">${route.origin} <i class="fas fa-arrow-right text-xs mx-1 opacity-50"></i> ${route.destination}</h3>
+                    <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-sm font-bold">R${route.fare}</span>
+                </div>
+                <div class="space-y-3 mb-6 flex-grow">
+                    <div class="flex items-center gap-3 text-sm">
+                        <i class="fas fa-clock w-5 text-green-500"></i>
+                        <span>${route.hours}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm">
+                        <i class="fas fa-sync w-5 text-green-500"></i>
+                        <span>${route.returns ? 'Returns available' : 'One way only'}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm">
+                        <i class="fas fa-info-circle w-5 text-green-500"></i>
+                        <span class="capitalize">${route.type.replace('_', ' ')}</span>
+                    </div>
+                </div>
+                <button onclick="alert('Taxi ranks are located at Poortjie main entrance and shopping centre.')" class="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-green-600 hover:text-white transition rounded-lg font-bold text-sm">
+                    View Rank Location
+                </button>
+            `;
+            routesGrid.appendChild(card);
+        });
+    }
+
+    fetchRoutes();
+</script>
+</body>
+</html>

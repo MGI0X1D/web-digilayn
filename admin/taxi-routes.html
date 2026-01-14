@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Routes Manager | Poortjie Services</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="icon" href="../favicon/favicon.ico">
+</head>
+<body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+
+<div id="admin-content" class="hidden">
+    <header class="max-w-6xl mx-auto pt-24 pb-16 px-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Taxi Routes Manager</h1>
+                <p class="text-xl opacity-80">Inject and manage taxi routes for Poortjie</p>
+            </div>
+            <a href="admin.html" class="px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">Back to Admin</a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        <div class="card p-8 rounded-2xl bg-white dark:bg-slate-800 shadow-xl">
+            <h2 class="text-2xl font-bold mb-6">Route Data (JSON)</h2>
+            <div class="mb-6">
+                <p class="mb-4 text-sm opacity-70">Paste your JSON data below. It should follow the structure with "routes" object containing route keys.</p>
+                <textarea id="json-input" rows="20" class="w-full p-4 font-mono text-sm border rounded-lg bg-gray-50 dark:bg-slate-900 dark:border-slate-700 focus:ring-2 focus:ring-green-500 outline-none"></textarea>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button id="load-current" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Load Current</button>
+                <button id="save-routes" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">Inject Routes</button>
+            </div>
+            <div id="status-message" class="mt-4 p-4 rounded-lg hidden"></div>
+        </div>
+    </main>
+</div>
+
+<script src="../scripts/theme.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../scripts/firebase.js"></script>
+
+<script>
+    const jsonInput = document.getElementById('json-input');
+    const saveBtn = document.getElementById('save-routes');
+    const loadBtn = document.getElementById('load-current');
+    const statusMsg = document.getElementById('status-message');
+
+    // Default JSON if nothing in DB
+    const defaultData = {
+      "routes": {
+        "poortjie_to_lenasia": {
+          "origin": "Poortjie",
+          "destination": "Lenasia",
+          "fare": 25,
+          "hours": "6am - 8pm",
+          "returns": true,
+          "type": "standard"
+        },
+        "poortjie_to_westonaria": {
+          "origin": "Poortjie",
+          "destination": "Westonaria",
+          "fare": 25,
+          "hours": "6am - 8pm",
+          "returns": true,
+          "type": "standard"
+        },
+        "poortjie_to_evaton": {
+          "origin": "Poortjie",
+          "destination": "Evaton",
+          "fare": 18,
+          "hours": "6am - 7pm",
+          "returns": true,
+          "type": "standard"
+        },
+        "poortjie_to_joburg": {
+          "origin": "Poortjie",
+          "destination": "Johannesburg",
+          "fare": 32,
+          "hours": "6am - 7pm",
+          "returns": true,
+          "type": "standard"
+        },
+        "poortjie_to_bara": {
+          "origin": "Poortjie",
+          "destination": "Bara",
+          "fare": 32,
+          "hours": "6:30am only",
+          "returns": false,
+          "type": "morning_only"
+        }
+      }
+    };
+
+    function showStatus(message, isError = false) {
+        statusMsg.textContent = message;
+        statusMsg.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+        statusMsg.classList.add(isError ? 'bg-red-100' : 'bg-green-100');
+        statusMsg.classList.add(isError ? 'text-red-700' : 'text-green-700');
+        setTimeout(() => statusMsg.classList.add('hidden'), 5000);
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if (doc.exists && doc.data().roles?.digilayn?.isSuperUser === true) {
+                    document.getElementById('admin-content').classList.remove('hidden');
+                    loadCurrentRoutes();
+                } else {
+                    window.location.replace('../home.html');
+                }
+            });
+        } else {
+            window.location.replace('../authentication/login.html');
+        }
+    });
+
+    function loadCurrentRoutes() {
+        db.collection('poortjie').doc('taxi_routes').get().then(doc => {
+            if (doc.exists) {
+                jsonInput.value = JSON.stringify(doc.data(), null, 2);
+            } else {
+                jsonInput.value = JSON.stringify(defaultData, null, 2);
+            }
+        }).catch(err => {
+            console.error("Error loading routes:", err);
+            jsonInput.value = JSON.stringify(defaultData, null, 2);
+        });
+    }
+
+    loadBtn.addEventListener('click', loadCurrentRoutes);
+
+    saveBtn.addEventListener('click', async () => {
+        try {
+            const data = JSON.parse(jsonInput.value);
+            if (!data.routes) {
+                throw new Error('JSON must contain a "routes" object.');
+            }
+            
+            await db.collection('poortjie').doc('taxi_routes').set(data);
+            showStatus('Routes successfully injected!');
+        } catch (err) {
+            showStatus('Error: ' + err.message, true);
+        }
+    });
+</script>
+</body>
+</html>

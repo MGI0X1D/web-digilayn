@@ -122,7 +122,10 @@
                             ${service.list.map(item => `<li class="flex items-center gap-2">${item}</li>`).join('')}
                         </ul>
                     </div>
-                    <a href="${service.url}" onclick="window.top.location.replace('${service.url}'); return false;" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">${service.btnText}</a>
+                    <div class="mt-6 flex flex-col gap-2">
+                        <a href="${service.url}" onclick="window.top.location.replace('${service.url}'); return false;" class="block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">${service.btnText}</a>
+                        ${service.extraBtn ? `<a href="${service.extraBtn.url}" onclick="window.top.location.replace('${service.extraBtn.url}'); return false;" class="block text-center py-2 border-2 border-green-600 text-green-600 dark:text-green-400 rounded-lg font-bold hover:bg-green-600 hover:text-white transition">${service.extraBtn.text}</a>` : ''}
+                    </div>
                 </div>
             </section>
         `).join('');
@@ -176,7 +179,13 @@
                             list: service.listing || [],
                             url: `services/${key.toLowerCase()}.html`,
                             target: '_top',
-                            btnText: `Explore ${key}`
+                            btnText: `Explore ${key}`,
+                            ...(key === 'Transport' ? { 
+                                extraBtn: { 
+                                    text: 'Taxi Routes', 
+                                    url: 'services/taxi-routes.html' 
+                                } 
+                            } : {})
                         };
                     });
                     
