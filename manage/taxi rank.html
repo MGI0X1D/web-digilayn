@@ -23,7 +23,7 @@
                 <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Taxi Rank Info Manager</h1>
                 <p class="text-xl opacity-80">Manage taxi news, routes, and rank locations for Poortjie</p>
             </div>
-            <a href="admin.html" class="px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">Back to Admin</a>
+            <a href="business.html" class="px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">Back to Admin</a>
         </div>
     </header>
 
@@ -160,8 +160,8 @@
     function initMap() {
         if (map) return;
         
-        // Default center to Poortjie area if possible, otherwise SA
-        map = L.map('map').setView([-26.467, 27.848], 13);
+        // Default center to Poortjie rank
+        map = L.map('map').setView([-26.456778308219796, 27.767730640546663], 15);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -314,7 +314,7 @@
         setTimeout(() => {
             initMap();
             map.invalidateSize();
-            map.setView([-26.467, 27.848], 13);
+            map.setView([-26.456778308219796, 27.767730640546663], 15);
         }, 100);
     };
 
@@ -362,7 +362,7 @@
                 marker = null;
                 selectedLat = null;
                 selectedLng = null;
-                map.setView([-26.467, 27.848], 13);
+                map.setView([-26.456778308219796, 27.767730640546663], 15);
             }
         }, 100);
     };
