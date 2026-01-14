@@ -21,9 +21,11 @@
         <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Taxi Rank Info Manager</h1>
-                <p class="text-xl opacity-80">Manage taxi news, routes, and rank locations for Poortjie</p>
+                <p id="welcome-message" class="text-xl opacity-80">Manage taxi news, routes, and rank locations for Poortjie</p>
             </div>
-            <a href="business.html" class="px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">Back to Admin</a>
+            <div class="flex gap-4">
+                <a href="../home.html" onclick="window.location.replace('../home.html'); return false;" class="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition">Home</a>
+            </div>
         </div>
     </header>
 
@@ -201,9 +203,21 @@
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
             db.collection('users').doc(user.uid).get().then(doc => {
-                if (doc.exists && doc.data().roles?.digilayn?.isSuperUser === true) {
-                    document.getElementById('admin-content').classList.remove('hidden');
-                    loadData();
+                if (doc.exists) {
+                    const userData = doc.data();
+                    const isSuperUser = userData.roles?.digilayn?.isSuperUser === true;
+                    const isTaxiRankAdmin = userData.roles?.poortjie?.isTaxiRankAdmin === true;
+
+                    if (isSuperUser || isTaxiRankAdmin) {
+                        const welcomeMsg = document.getElementById('welcome-message');
+                        const name = userData.name || (isSuperUser ? 'Super User' : 'Admin');
+                        welcomeMsg.textContent = `Welcome, ${name}!`;
+
+                        document.getElementById('admin-content').classList.remove('hidden');
+                        loadData();
+                    } else {
+                        window.location.replace('../home.html');
+                    }
                 } else {
                     window.location.replace('../home.html');
                 }
