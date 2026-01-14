@@ -265,7 +265,7 @@
                         <button onclick="requestUpdate('${app.id}')" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">Update</button>
                         <button onclick="rejectApplication('${app.id}')" class="bg-red-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow-sm">Reject</button>
                         ` : ''}
-                        ${isSuperUser && app.status !== 'disabled' ? `
+                        ${isSuperUser && app.status === 'approved' ? `
                         <button onclick="disableListing('${app.id}')" class="bg-slate-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-slate-700 transition shadow-sm">Disable</button>
                         ` : ''}
                     </div>
@@ -285,6 +285,7 @@
             const appData = appDoc.data();
 
             const servicesRef = db.collection('poortjie').doc('services');
+            const liveServiceRef = db.collection('poortjie').doc('services').collection('listings').doc(appId);
             
             await db.runTransaction(async (transaction) => {
                 const servicesDoc = await transaction.get(servicesRef);
@@ -292,11 +293,16 @@
                 const homeScreen = servicesData.homeScreen || {};
                 const category = appData.businessType;
 
+                // 1. Remove from homeScreen if present
                 if (homeScreen[category] && homeScreen[category].data && homeScreen[category].data[appId]) {
                     delete homeScreen[category].data[appId];
                     transaction.update(servicesRef, { homeScreen });
                 }
 
+                // 2. Update status in live services collection
+                transaction.set(liveServiceRef, { status: 'disabled' }, { merge: true });
+
+                // 3. Update status in applications collection
                 transaction.update(appRef, { status: 'disabled' });
             });
 
@@ -359,6 +365,11 @@
                 }
                 
                 transaction.update(servicesRef, updateData);
+
+                // Initialize/Update status in live services collection
+                const liveServiceRef = db.collection('poortjie').doc('services').collection('listings').doc(appId);
+                transaction.set(liveServiceRef, { status: 'active' }, { merge: true });
+
                 transaction.update(appRef, { 
                     status: 'approved',
                     businessType: finalCategory // Update the app record too
