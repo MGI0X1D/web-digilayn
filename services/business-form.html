@@ -259,7 +259,17 @@
     businessForm.addEventListener('submit', event => {
         event.preventDefault();
         if (submitBtn.disabled) return;
-        showLoader();
+        
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="flex items-center justify-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Submitting...
+        </span>`;
+
         const user = auth.currentUser;
         if (!user) {
             window.location.href = '../authentication/login.html';
@@ -282,15 +292,34 @@
             status: 'pending',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
+
         db.collection('poortjie').doc('applications').collection('listings').add(businessData)
             .then(() => {
-                alert('Thank you! Your business has been submitted successfully.');
-                window.location.reload();
+                // Friendly success message using the status container instead of alert
+                statusContainer.innerHTML = `
+                    <div class="p-4 rounded-lg bg-green-100 text-green-700 font-bold border border-green-200">
+                        Success! Your business application has been submitted and is now pending review.
+                    </div>
+                `;
+                statusContainer.classList.remove('hidden');
+                businessForm.classList.add('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Optional: reload or redirect after a delay
+                setTimeout(() => window.location.reload(), 3000);
             })
             .catch((error) => {
-                hideLoader();
-                console.error("Error adding document: ", error);
-                alert('There was an error submitting your form.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+                console.error("Firebase Application Submission Error: ", error);
+                
+                statusContainer.innerHTML = `
+                    <div class="p-4 rounded-lg bg-red-100 text-red-700 font-bold border border-red-200">
+                        Error: ${error.message || 'There was an error submitting your form. Please try again.'}
+                    </div>
+                `;
+                statusContainer.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
     });
 
