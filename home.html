@@ -99,7 +99,6 @@
 
 <script src="scripts/theme.js"></script>
 <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-<script src="scripts/local-db.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -140,7 +139,8 @@
         let filtered = allServices.filter(service => 
             service.category.toLowerCase().includes(searchTerm) || 
             service.title.toLowerCase().includes(searchTerm) ||
-            service.description.toLowerCase().includes(searchTerm)
+            service.description.toLowerCase().includes(searchTerm) ||
+            service.list.some(item => item.toLowerCase().includes(searchTerm))
         );
 
         if (sortValue === 'asc') {
