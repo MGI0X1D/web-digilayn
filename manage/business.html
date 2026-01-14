@@ -294,9 +294,10 @@
                 const homeScreen = servicesData.homeScreen || {};
                 const category = appData.businessType;
 
-                // 1. Remove from homeScreen if present
+                // 1. Update status in homeScreen instead of removing
                 if (homeScreen[category] && homeScreen[category].data && homeScreen[category].data[appId]) {
-                    delete homeScreen[category].data[appId];
+                    homeScreen[category].data[appId].status = 'disabled';
+                    homeScreen[category].data[appId].disabledBy = currentUserId;
                     transaction.update(servicesRef, { homeScreen });
                 }
 
