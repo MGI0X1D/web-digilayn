@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await updateOverallServiceRating(serviceId, serviceKey);
 
             closeModal();
-            location.reload();
+            window.location.replace(window.location.href);
         } catch (error) {
             console.error("Error submitting rating:", error);
             alert('Failed to save rating. Try again.');
