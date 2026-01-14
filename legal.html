@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Policy Center – Digilayn Studio</title>
+    <title>Policy Center – Poortjie Services</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#6ddf4f">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <style>
         :root {
           --digilayn-green: #6ddf4f;
@@ -21,6 +27,51 @@
           color: var(--text-dark);
           background: var(--bg-gray);
           line-height: 1.7;
+          transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark mode overrides */
+        html.dark body {
+            background-color: #0f172a; /* bg-slate-900 */
+            color: #f8fafc; /* text-slate-50 */
+        }
+        
+        html.dark .header {
+            background-color: #1e293b; /* bg-slate-800 */
+            border-bottom-color: #334155; /* border-slate-700 */
+        }
+        
+        html.dark .header h1 { color: #f8fafc; }
+        html.dark .header p { color: #94a3b8; }
+
+        html.dark .hub-card {
+            background-color: #1e293b;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        
+        html.dark .hub-card h3 { color: #f8fafc; }
+        html.dark .hub-card span { color: #94a3b8; }
+        
+        html.dark .hub-card.active {
+            background-color: #064e3b; /* green-900ish */
+            border-color: #6ddf4f;
+        }
+
+        html.dark .policy-container {
+            background-color: #1e293b;
+        }
+        
+        html.dark .policy-body { color: #cbd5e0; }
+        
+        html.dark h2 { border-bottom-color: #334155; }
+        
+        html.dark .date-badge {
+            background-color: #334155;
+            color: #94a3b8;
+        }
+        
+        html.dark .icon-circle {
+            background-color: #334155;
         }
 
         .header {
@@ -201,22 +252,22 @@
 
 <div class="header">
     <h1>Policy Center</h1>
-    <p>Legal documentation for Digilayn products and services.</p>
+    <p>Legal documentation for Poortjie Services products and services.</p>
 </div>
 
 <div class="container">
-    <a href="index.html" class="back-link">← Back to Digilayn Home</a>
+    <a href="index.html" class="back-link">← Back to Poortjie Services Home</a>
 
     <!-- Hub Navigation -->
     <div class="hub-nav">
         <div class="hub-card active" onclick="switchProduct('layn')">
             <div class="icon-circle" style="background: #e6fffa; color: #319795;">🚗</div>
-            <h3>Digilayn Platform</h3>
+            <h3>Poortjie Platform</h3>
             <span>Rider & Driver Apps</span>
         </div>
         <div class="hub-card" onclick="switchProduct('studio')">
             <div class="icon-circle">🏢</div>
-            <h3>Digilayn Studio</h3>
+            <h3>Poortjie Studio</h3>
             <span>General Terms</span>
         </div>
     </div>
@@ -225,7 +276,7 @@
     <div id="product-layn" class="policy-container active">
         <div class="policy-header">
             <div>
-                <h2 style="margin:0; border:none; color:#fff;">Digilayn Platform</h2>
+                <h2 style="margin:0; border:none; color:#fff;">Poortjie Platform</h2>
                 <span style="font-size: 0.9rem; opacity: 0.7;">Specific to Layn Rider & Layn Driver</span>
             </div>
             <div class="policy-tabs">
@@ -238,7 +289,7 @@
             <div id="layn-terms" class="policy-content active">
                 <span class="date-badge">Effective Date: January 2026</span>
                 <h2>1. Agreement to Terms</h2>
-                <p>These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity (“you”) and the owner of Layn Rider and Layn Driver (“we,” “us,” or “our”), concerning your access to and use of the Digilayn Transportation mobile applications (the “Apps”). You agree that by accessing the Apps, you have read, understood, and agreed to be bound by all of these Terms and Conditions.</p>
+                <p>These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity (“you”) and the owner of Layn Rider and Layn Driver (“we,” “us,” or “our”), concerning your access to and use of the Poortjie Transportation mobile applications (the “Apps”). You agree that by accessing the Apps, you have read, understood, and agreed to be bound by all of these Terms and Conditions.</p>
 
                 <h2>2. The Technology Platform</h2>
                 <p>You acknowledge that we do not provide transportation or logistics services or function as a transportation carrier. All such transportation services are provided by independent third-party contractors (Admins and their Drivers) who are not employed by the App Owner. We offer a technology platform that enables users to arrange and schedule transportation services with third-party providers.</p>
@@ -308,15 +359,15 @@
         </div>
     </div>
 
-    <!-- Digilayn Studio Content Placeholder -->
+    <!-- Poortjie Studio Content Placeholder -->
     <div id="product-studio" class="policy-container">
         <div class="policy-header" style="background: #6ddf4f;">
-            <h2 style="margin:0; border:none; color:#fff;">Digilayn Studio Terms</h2>
+            <h2 style="margin:0; border:none; color:#fff;">Poortjie Studio Terms</h2>
         </div>
         <div class="policy-body" style="text-align: center; padding: 100px 40px;">
             <div style="font-size: 3rem; margin-bottom: 20px;">🏗️</div>
             <h3>General Terms Coming Soon</h3>
-            <p>We are currently drafting the overarching terms for the Digilayn Studio ecosystem.</p>
+            <p>We are currently drafting the overarching terms for the Poortjie Studio ecosystem.</p>
         </div>
     </div>
 </div>
@@ -344,6 +395,6 @@
         document.getElementById(prod + '-' + type).classList.add('active');
     }
 </script>
-
+<script src="scripts/theme.js"></script>
 </body>
 </html>

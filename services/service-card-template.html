@@ -1,0 +1,44 @@
+<div class="card service-card p-6 rounded-2xl border-l-4 border-l-green-500 flex flex-col justify-between bg-white dark:bg-slate-800 shadow-sm" data-name="{{businessName}}" data-rating="{{ratingValue}}">
+    <div>
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <h3 class="text-xl font-bold">{{businessName}}</h3>
+                <h4 class="text-md opacity-80">{{subHeading}}</h4>
+            </div>
+            <div class="flex items-center gap-1 text-sm font-bold text-amber-500 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full shrink-0">
+                <span>{{rating}}</span>
+                <i class="fas fa-star text-xs"></i>
+            </div>
+        </div>
+        <p class="text-sm opacity-70 mb-4">{{description}}</p>
+        <div class="text-sm font-medium space-y-2 mb-4">
+            <p class="flex items-center gap-2"><i class="fas fa-phone text-green-500"></i> <a href="tel:{{phone}}">{{phone}}</a></p>
+            <a href="https://www.google.com/maps/search/?api=1&query={{address}}" target="_blank" class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-500"></i> {{address}}</a>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+        <a href="tel:{{phone}}" class="flex-1 text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">Call</a>
+        <button class="flex-1 text-center py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition rate-service" data-service-id="{{serviceId}}" data-service-key="{{serviceKey}}">Rate</button>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+        <div class="flex justify-between items-center mb-2">
+            <p class="text-xs font-bold uppercase tracking-wider opacity-50">Recent Comments</p>
+            <div class="flex items-center gap-2">
+                <select class="comment-sort-select text-[10px] bg-transparent border-none opacity-50 hover:opacity-100 focus:ring-0 cursor-pointer outline-none p-0" data-service-id="{{serviceId}}" data-service-key="{{serviceKey}}">
+                    <option value="most-liked">Most Liked</option>
+                    <option value="least-liked">Least Liked</option>
+                </select>
+            </div>
+        </div>
+        <div class="comments-container space-y-2 max-h-48 overflow-hidden relative" data-service-id="{{serviceId}}">
+            <div class="comments-wrapper space-y-2 pr-1 custom-scrollbar">
+                {{comments}}
+            </div>
+            <div class="show-more-comments hidden absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-slate-800 to-transparent flex items-end justify-center pb-1 cursor-pointer transition-opacity hover:opacity-80">
+                <i class="fas fa-chevron-down text-xs opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
