@@ -757,7 +757,6 @@
         });
 
         marker.addListener("dragstart", () => {
-             addressInput.value = "Dragging pin...";
              document.getElementById('address-error').classList.add('hidden');
         });
 
@@ -790,46 +789,12 @@
         selectedLat = pos.lat();
         selectedLng = pos.lng();
         
-        // Show loading state in address input
-        const originalPlaceholder = addressInput.placeholder;
-        addressInput.value = "Fetching address...";
-        addressInput.disabled = true;
-
-        geocoder.geocode({ location: pos }, (results, status) => {
-            addressInput.disabled = false;
-            if (status === "OK") {
-                if (results[0]) {
-                    // Extract only the street/route
-                    let street = "";
-                    const components = results[0].address_components;
-                    for (const component of components) {
-                        if (component.types.includes("route")) {
-                            street = component.long_name;
-                            break;
-                        }
-                    }
-                    
-                    // If no street found, fall back to neighborhood or sublocality
-                    if (!street) {
-                        for (const component of components) {
-                            if (component.types.includes("neighborhood") || component.types.includes("sublocality")) {
-                                street = component.long_name;
-                                break;
-                            }
-                        }
-                    }
-
-                    addressInput.value = street || results[0].formatted_address;
-                    isAddressSelectedFromAutocomplete = true;
-                    validateForm();
-                } else {
-                    addressInput.value = "";
-                }
-            } else {
-                console.error("Geocoder failed due to: " + status);
-                addressInput.value = "";
-            }
-        });
+        // Only set address to "Dropped Pin" if it's currently empty
+        if (!addressInput.value.trim()) {
+            addressInput.value = "Dropped Pin";
+            isAddressSelectedFromAutocomplete = true;
+            validateForm();
+        }
     }
 
     function initAutocomplete() {
