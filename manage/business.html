@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Poortjie Services</title>
+    <meta name="robots" content="noindex, nofollow"> <!-- Prevents search engines from indexing this page -->
+    <meta name="theme-color" content="#22c55e">
+
+    <link rel="icon" href="../favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+
+<div id="admin-content" class="hidden">
+    <header class="max-w-6xl mx-auto pt-24 pb-16 px-6">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-4xl font-extrabold tracking-tight">Admin Dashboard</h1>
+            <a href="../home.html" onclick="window.location.replace('../home.html'); return false;" class="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition">Home</a>
+        </div>
+        <p id="welcome-message" class="text-xl opacity-80">Welcome, Super User!</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        <div class="card p-8 rounded-2xl">
+            <h2 class="text-2xl font-bold mb-6">Business Applications</h2>
+            
+            <!-- Filters, Search and Sort -->
+            <div class="mb-8 space-y-4">
+                <div class="flex flex-wrap gap-4 items-center justify-between">
+                    <!-- Filter Chips -->
+                    <div id="filter-chips" class="flex gap-2">
+                        <button onclick="setFilter('all')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-green-600 text-white border-green-600" data-filter="all">All</button>
+                        <button onclick="setFilter('pending')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="pending">Pending</button>
+                        <button onclick="setFilter('approved')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="approved">Approved</button>
+                        <button onclick="setFilter('rejected')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="rejected">Rejected</button>
+                        <button id="disabled-filter" onclick="setFilter('disabled')" class="filter-chip hidden px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="disabled">Disabled</button>
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="flex items-center gap-2">
+                        <label for="sort-apps" class="text-sm opacity-70">Sort by:</label>
+                        <select id="sort-apps" onchange="filterAndSort()" class="px-3 py-2 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                            <option value="newest">Newest First</option>
+                            <option value="owner">Owner Name (A-Z)</option>
+                            <option value="business">Business Name (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <label for="search-apps"></label><input type="text" id="search-apps" oninput="filterAndSort()" placeholder="Search by business, owner, or email..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+            </div>
+
+            <div id="applications-list" class="space-y-4">
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="../scripts/theme.js"></script>
+<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+<script src="../scripts/local-db.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../scripts/firebase.js"></script>
+
+<script>
+    let currentCategories = [];
+    let allApplications = [];
+    let currentFilter = 'all';
+    let isSuperUser = false;
+
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            const userRef = db.collection('users').doc(user.uid);
+            userRef.get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    isSuperUser = userData.roles?.digilayn?.isSuperUser === true;
+                    const isPoortjieAdmin = userData.roles?.poortjie?.isAdmin === true;
+
+                    if (isSuperUser || isPoortjieAdmin) {
+                        const welcomeMsg = document.getElementById('welcome-message');
+                        const name = userData.name || (isSuperUser ? 'Super User' : 'Admin');
+                        welcomeMsg.textContent = `Welcome, ${name}!`;
+                        
+                        if (isSuperUser) {
+                            document.getElementById('disabled-filter').classList.remove('hidden');
+                        }
+                        
+                        document.getElementById('admin-content').classList.remove('hidden');
+                        fetchCategories().then(() => {
+                            loadApplications();
+                        });
+                    } else {
+                        window.top.location.replace('../index.html');
+                    }
+                } else {
+                    window.top.location.replace('../index.html');
+                }
+            }).catch((error) => {
+                console.error("Error getting user data:", error);
+                alert('An error occurred while verifying your permissions.');
+                window.top.location.replace('../index.html');
+            });
+        } else {
+            sessionStorage.setItem('redirectUrl', window.top.location.href);
+            window.top.location.replace('../authentication/login.html');
+        }
+    });
+
+    async function fetchCategories() {
+        try {
+            const doc = await db.collection('poortjie').doc('services').get();
+            if (doc.exists && doc.data().homeScreen) {
+                currentCategories = Object.keys(doc.data().homeScreen).sort();
+            }
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }
+
+    function getStatusBadge(status) {
+        switch (status) {
+            case 'approved':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Approved</span>`;
+            case 'rejected':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Rejected</span>`;
+            case 'disabled':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-gray-600 bg-gray-200">Disabled</span>`;
+            case 'update':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">Update Requested</span>`;
+            default:
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-200">Pending</span>`;
+        }
+    }
+
+    function loadApplications() {
+        const applicationsList = document.getElementById('applications-list');
+        const applicationsRef = db.collection('poortjie').doc('applications').collection('listings');
+
+        // Use onSnapshot for real-time updates, but store in allApplications
+        applicationsRef.onSnapshot(snapshot => {
+            allApplications = [];
+            snapshot.forEach(doc => {
+                allApplications.push({ id: doc.id, ...doc.data() });
+            });
+            filterAndSort();
+        }, error => {
+            console.error("Error loading applications:", error);
+            applicationsList.innerHTML = '<p>Error loading applications. Check console for details.</p>';
+        });
+    }
+
+    function setFilter(filter) {
+        currentFilter = filter;
+        
+        // Update UI
+        document.querySelectorAll('.filter-chip').forEach(btn => {
+            if (btn.getAttribute('data-filter') === filter) {
+                btn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300', 'border-gray-300', 'dark:border-slate-600');
+                btn.classList.add('bg-green-600', 'text-white', 'border-green-600');
+            } else {
+                btn.classList.add('bg-white', 'dark:bg-slate-800', 'text-slate-600', 'dark:text-slate-300', 'border-gray-300', 'dark:border-slate-600');
+                btn.classList.remove('bg-green-600', 'text-white', 'border-green-600');
+            }
+        });
+        
+        filterAndSort();
+    }
+
+    function filterAndSort() {
+        const searchTerm = document.getElementById('search-apps').value.toLowerCase();
+        const sortValue = document.getElementById('sort-apps').value;
+        const applicationsList = document.getElementById('applications-list');
+
+        let filtered = allApplications;
+
+        // Apply Status Filter
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(app => {
+                const status = app.status || 'pending';
+                if (currentFilter === 'pending') {
+                    return status === 'pending' || status === 'update';
+                }
+                return status === currentFilter;
+            });
+        }
+
+        // Apply Search
+        if (searchTerm) {
+            filtered = filtered.filter(app => 
+                app.businessName?.toLowerCase().includes(searchTerm) || 
+                app.ownerName?.toLowerCase().includes(searchTerm) ||
+                app.userEmail?.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // Apply Sort
+        if (sortValue === 'owner') {
+            filtered.sort((a, b) => (a.ownerName || '').localeCompare(b.ownerName || ''));
+        } else if (sortValue === 'business') {
+            filtered.sort((a, b) => (a.businessName || '').localeCompare(b.businessName || ''));
+        } else if (sortValue === 'newest') {
+            // Firestore doesn't always have a timestamp on all old docs, 
+            // but let's assume createdAt or just use array order/id as fallback
+            filtered.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        }
+
+        renderApplications(filtered);
+    }
+
+    function renderApplications(applications) {
+        const applicationsList = document.getElementById('applications-list');
+        
+        if (applications.length === 0) {
+            applicationsList.innerHTML = '<p class="text-center py-8 opacity-60">No matching applications found.</p>';
+            return;
+        }
+
+        let html = '';
+        applications.forEach(app => {
+            const isPending = !app.status || app.status === 'pending' || app.status === 'update';
+            const isOther = app.businessType === 'Other';
+            
+            html += `
+                <div class="p-6 card rounded-xl border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-2">
+                            <h4 class="text-lg font-bold">${app.businessName}</h4>
+                            ${getStatusBadge(app.status)}
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 text-sm opacity-80">
+                            <p><span class="font-semibold">Owner:</span> ${app.ownerName}</p>
+                            <p><span class="font-semibold">Email:</span> ${app.userEmail || 'N/A'}</p>
+                            <p><span class="font-semibold">Phone:</span> ${app.phone}</p>
+                            <p><span class="font-semibold">Type:</span> ${app.businessType}</p>
+                        </div>
+                        
+                        ${isPending && isOther ? `
+                        <div class="mt-4 p-4 bg-gray-50 dark:bg-slate-900/50 rounded-lg border border-gray-200 dark:border-slate-700">
+                            <p class="text-xs font-bold uppercase mb-2">Reassign Category</p>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <select id="category-select-${app.id}" class="flex-grow text-sm p-2 rounded bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600">
+                                    <option value="">-- Choose Existing --</option>
+                                    ${currentCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                                </select>
+                                <input type="text" id="category-input-${app.id}" placeholder="Or type new category" class="flex-grow text-sm p-2 rounded bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600">
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="flex flex-wrap gap-2 shrink-0">
+                        ${isPending ? `
+                        <button onclick="approveApplication('${app.id}')" class="bg-green-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 transition shadow-sm">Approve</button>
+                        <button onclick="requestUpdate('${app.id}')" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">Update</button>
+                        <button onclick="rejectApplication('${app.id}')" class="bg-red-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow-sm">Reject</button>
+                        ` : ''}
+                        ${isSuperUser && app.status === 'approved' ? `
+                        <button onclick="disableListing('${app.id}')" class="bg-slate-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-slate-700 transition shadow-sm">Disable</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        applicationsList.innerHTML = html;
+    }
+
+    async function disableListing(appId) {
+        if (!confirm('Are you sure you want to disable this listing? It will be removed from public view.')) return;
+
+        try {
+            const currentUserId = firebase.auth().currentUser?.uid;
+            const appRef = db.collection('poortjie').doc('applications').collection('listings').doc(appId);
+            const appDoc = await appRef.get();
+            if (!appDoc.exists) throw "Application does not exist!";
+            const appData = appDoc.data();
+
+            const servicesRef = db.collection('poortjie').doc('services');
+            const liveServiceRef = db.collection('poortjie').doc('services').collection('listings').doc(appId);
+            
+            await db.runTransaction(async (transaction) => {
+                const servicesDoc = await transaction.get(servicesRef);
+                const servicesData = servicesDoc.data() || {};
+                const homeScreen = servicesData.homeScreen || {};
+                const category = appData.businessType;
+
+                // 1. Update status in homeScreen instead of removing
+                if (homeScreen[category] && homeScreen[category].data && homeScreen[category].data[appId]) {
+                    homeScreen[category].data[appId].status = 'disabled';
+                    homeScreen[category].data[appId].disabledBy = currentUserId;
+                    transaction.update(servicesRef, { homeScreen });
+                }
+
+                // 2. Update status in live services collection
+                transaction.set(liveServiceRef, { 
+                    status: 'disabled',
+                    disabledBy: currentUserId 
+                }, { merge: true });
+
+                // 3. Update status in applications collection
+                transaction.update(appRef, { 
+                    status: 'disabled',
+                    disabledBy: currentUserId
+                });
+            });
+
+            alert('Listing disabled and removed from public view.');
+        } catch (error) {
+            console.error("Error disabling listing:", error);
+            alert('Failed to disable listing: ' + error);
+        }
+    }
+
+    async function approveApplication(appId) {
+        const currentUserId = firebase.auth().currentUser?.uid;
+        const appRef = db.collection('poortjie').doc('applications').collection('listings').doc(appId);
+        const servicesRef = db.collection('poortjie').doc('services');
+
+        try {
+            const appDoc = await appRef.get();
+            if (!appDoc.exists) throw "Application does not exist!";
+            const appData = appDoc.data();
+
+            let finalCategory = appData.businessType;
+
+            if (finalCategory === 'Other') {
+                const selectVal = document.getElementById(`category-select-${appId}`).value;
+                const inputVal = document.getElementById(`category-input-${appId}`).value.trim();
+                
+                finalCategory = inputVal || selectVal;
+                
+                if (!finalCategory || finalCategory === 'Other') {
+                    alert("Please select or type a valid category for 'Other' business type.");
+                    return;
+                }
+            }
+
+            if (!confirm(`Approve this business under category "${finalCategory}"?`)) return;
+
+            await db.runTransaction(async (transaction) => {
+                const servicesDoc = await transaction.get(servicesRef);
+                const servicesData = servicesDoc.data() || {};
+                const homeScreen = servicesData.homeScreen || {};
+
+                const businessData = { 
+                    ...appData, 
+                    businessType: finalCategory,
+                    status: 'active',
+                    approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    approvedBy: currentUserId
+                };
+                
+                const updateData = {};
+                
+                // If category doesn't exist, we need to initialize it
+                if (!homeScreen[finalCategory]) {
+                    updateData[`homeScreen.${finalCategory}`] = {
+                        description: `Local ${finalCategory.toLowerCase()} services in Poortjie.`,
+                        subtitle: `${finalCategory} Experts`,
+                        listing: [],
+                        data: { [appId]: businessData }
+                    };
+                } else {
+                    updateData[`homeScreen.${finalCategory}.data.${appId}`] = businessData;
+                }
+                
+                transaction.update(servicesRef, updateData);
+
+                // Initialize/Update status in live services collection
+                const liveServiceRef = db.collection('poortjie').doc('services').collection('listings').doc(appId);
+                transaction.set(liveServiceRef, { 
+                    status: 'active',
+                    approvedBy: currentUserId 
+                }, { merge: true });
+
+                transaction.update(appRef, { 
+                    status: 'approved',
+                    businessType: finalCategory, // Update the app record too
+                    approvedBy: currentUserId
+                });
+            });
+
+            console.log("Application approved!");
+            // Refresh categories in case a new one was added
+            await fetchCategories();
+        } catch (error) {
+            console.error("Error approving application: ", error);
+            alert("Error: " + error);
+        }
+    }
+
+    function rejectApplication(appId) {
+        if (confirm('Are you sure you want to reject this application?')) {
+            const currentUserId = firebase.auth().currentUser?.uid;
+            db.doc(`poortjie/applications/listings/${appId}`).update({ 
+                status: 'rejected',
+                rejectedBy: currentUserId
+            }).then(() => {
+                console.log("Application rejected!");
+            }).catch(error => {
+                console.error("Error rejecting application: ", error);
+            });
+        }
+    }
+
+    function requestUpdate(appId) {
+        if (confirm('Request user to update this application?')) {
+            const currentUserId = firebase.auth().currentUser?.uid;
+            db.doc(`poortjie/applications/listings/${appId}`).update({ 
+                status: 'update',
+                updateRequestedBy: currentUserId
+            }).then(() => {
+                console.log("Update requested!");
+            }).catch(error => {
+                console.error("Error requesting update: ", error);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

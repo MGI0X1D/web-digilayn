@@ -33,7 +33,6 @@
 <body>
     <iframe src="home.html" id="main-frame" title="Poortjie Services Main Content"></iframe>
     <script>
-        // Update document title based on iframe content
         const iframe = document.getElementById('main-frame');
         iframe.onload = function() {
             try {
@@ -42,7 +41,6 @@
                     document.title = iframeTitle;
                 }
             } catch (e) {
-                // Ignore cross-origin errors if any external link is loaded
             }
         };
     </script>
