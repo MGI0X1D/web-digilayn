@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Main Initialization ---
     const initializeModal = () => {
+        // Initial check for currentUser
+        currentUser = firebase.auth().currentUser;
+
         // Use event delegation for the modal to handle dynamically loaded HTML
         document.body.addEventListener('click', (e) => {
             if (e.target.id === 'close-modal') closeModal();
@@ -29,9 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Like Comment Action ---
     const handleLikeClick = async (btn) => {
+        // If currentUser is not yet set, try to get it from firebase.auth() directly
+        if (!currentUser) {
+            currentUser = firebase.auth().currentUser;
+        }
+        
         if (!currentUser) {
             sessionStorage.setItem('redirectUrl', window.top.location.href);
-            window.top.location.replace('../authentication/login.html');
+            window.top.location.replace(window.location.pathname.includes('/services/') ? '../authentication/login.html' : 'authentication/login.html');
             return;
         }
 
@@ -83,9 +91,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Modal Control & Data Loading ---
     window.openRatingModal = async (sId, sKey) => {
+        // If currentUser is not yet set, try to get it from firebase.auth() directly
+        if (!currentUser) {
+            currentUser = firebase.auth().currentUser;
+        }
+
         if (!currentUser) {
             sessionStorage.setItem('redirectUrl', window.top.location.href);
-            window.top.location.replace('../authentication/login.html');
+            window.top.location.replace(window.location.pathname.includes('/services/') ? '../authentication/login.html' : 'authentication/login.html');
             return;
         }
         serviceId = sId;
@@ -251,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await updateOverallServiceRating(serviceId, serviceKey);
 
             closeModal();
-            alert('Rating saved successfully!');
+            location.reload();
         } catch (error) {
             console.error("Error submitting rating:", error);
             alert('Failed to save rating. Try again.');
@@ -284,7 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Initialize fetching the modal template
-    fetch('rating-modal.html')
+    const modalPath = window.location.pathname.includes('/services/') ? 'rating-modal.html' : 'services/rating-modal.html';
+    fetch(modalPath)
         .then(response => response.text())
         .then(html => {
             ratingModal.innerHTML = html;

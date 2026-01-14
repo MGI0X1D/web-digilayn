@@ -26,8 +26,7 @@
     <link rel="stylesheet" href="../styles/main.css">
     <style>
         body { transition: background-color 0.3s ease, color 0.3s ease; }
-        .card { transition: transform 0.2s ease; }
-        .selected { color: #f59e0b !important; }
+
     </style>
 </head>
 <body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
@@ -50,9 +49,9 @@
     <div class="mb-8 flex flex-col md:flex-row gap-4">
         <div class="relative flex-grow">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="search-bar" placeholder="Search providers..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <label for="search-bar"></label><input type="text" id="search-bar" placeholder="Search providers..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
         </div>
-        <select id="sort-list" class="px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+        <label for="sort-list"></label><select id="sort-list" class="px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
             <option value="rating">Sort by Rating</option>
             <option value="name">Sort by Name (A-Z)</option>
         </select>
@@ -74,6 +73,7 @@
 <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
 <script src="../scripts/local-db.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../scripts/firebase.js"></script>
 <script src="../scripts/rating.js"></script>
@@ -83,15 +83,20 @@
     const serviceProviderGrid = document.getElementById('service-provider-grid');
     let allProviders = [];
 
-    const addRatingButtonListeners = () => {
-        document.querySelectorAll('.rate-service').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const serviceId = e.currentTarget.dataset.serviceId;
-                const serviceKey = e.currentTarget.dataset.serviceKey;
+    // Use event delegation for the "Rate" button to handle dynamic rendering
+    serviceProviderGrid.addEventListener('click', (e) => {
+        const button = e.target.closest('.rate-service');
+        if (button) {
+            e.preventDefault();
+            const serviceId = button.dataset.serviceId;
+            const serviceKey = button.dataset.serviceKey;
+            if (window.openRatingModal) {
                 window.openRatingModal(serviceId, serviceKey);
-            });
-        });
-    }
+            } else {
+                console.error("openRatingModal is not defined. Check rating.js loading.");
+            }
+        }
+    });
 
     const renderProviders = async (providers) => {
         serviceProviderGrid.innerHTML = '';
@@ -101,7 +106,6 @@
                 serviceProviderGrid.appendChild(card);
             }
         }
-        addRatingButtonListeners();
     };
 
     const fetchProviders = () => {

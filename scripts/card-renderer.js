@@ -16,6 +16,7 @@ async function renderServiceCard(provider, serviceKey, sortOption = 'most-liked'
         <p class="text-sm opacity-70 mb-4">{{description}}</p>
         <div class="text-sm font-medium space-y-2 mb-4">
             <p class="flex items-center gap-2"><i class="fas fa-phone text-green-500"></i> <a href="tel:{{phone}}">{{phone}}</a></p>
+            <p class="flex items-center gap-2 {{hoursVisibility}}"><i class="fas fa-clock text-green-500"></i> {{hours}}</p>
             <a href="{{mapsUrl}}" target="_blank" class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-green-500"></i> {{address}}</a>
             <div class="flex gap-3 pt-2">
                 {{socialLinks}}
@@ -61,8 +62,11 @@ async function renderServiceCard(provider, serviceKey, sortOption = 'most-liked'
             ? `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`
             : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + (address.toLowerCase().includes('poortjie') ? '' : ', Poortjie'))}`;
 
+        const hours = provider.hours || provider.operatingHours || provider.businessHours || 'N/A';
+        const hoursVisibility = (provider.hours || provider.operatingHours || provider.businessHours) ? '' : 'hidden';
+
         // Process Ratings map into Comments HTML
-        let commentsHtml = '';
+        let commentsHtml;
         let hasMoreThanTwo = false;
         
         if (provider.ratings && Object.keys(provider.ratings).length > 0) {
@@ -150,6 +154,8 @@ async function renderServiceCard(provider, serviceKey, sortOption = 'most-liked'
             .replace(/{{address}}/g, address)
             .replace(/{{mapsUrl}}/g, mapsUrl)
             .replace(/{{phone}}/g, provider.phone)
+            .replace(/{{hours}}/g, hours)
+            .replace(/{{hoursVisibility}}/g, hoursVisibility)
             .replace(/{{serviceId}}/g, provider.id)
             .replace(/{{serviceKey}}/g, serviceKey)
             .replace(/{{socialLinks}}/g, socialLinksHtml)
