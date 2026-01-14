@@ -104,6 +104,18 @@
     };
 
     const fetchProviders = () => {
+        // 1. Try to load from cache first
+        try {
+            const cachedData = sessionStorage.getItem('itProvidersCache');
+            if (cachedData) {
+                allProviders = JSON.parse(cachedData);
+                filterAndSort();
+            }
+        } catch (e) {
+            console.error("Could not read from sessionStorage:", e);
+        }
+
+        // 2. Fetch from Firestore
         db.collection('poortjie').doc('services').get()
             .then(doc => {
                 if (doc.exists) {
@@ -114,7 +126,14 @@
                             id: key,
                             ...techData[key]
                         }));
+                        
+                        // 3. Update cache and render
                         filterAndSort();
+                        try {
+                            sessionStorage.setItem('itProvidersCache', JSON.stringify(allProviders));
+                        } catch (e) {
+                            console.error("Could not write to sessionStorage:", e);
+                        }
                     } else {
                         serviceProviderGrid.innerHTML = '<p>No technical services found.</p>';
                     }
@@ -124,7 +143,9 @@
             })
             .catch(error => {
                 console.error("Error fetching services: ", error);
-                serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+                if (allProviders.length === 0) {
+                    serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+                }
             });
     };
     

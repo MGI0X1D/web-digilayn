@@ -122,27 +122,58 @@
     showLoader();
 
     const fetchCategories = () => {
+        // 1. Try to load from cache
+        try {
+            const cachedCategories = sessionStorage.getItem('categoriesCache');
+            if (cachedCategories) {
+                const categories = JSON.parse(cachedCategories);
+                renderCategoryOptions(categories);
+            }
+        } catch (e) {
+            console.error("Could not read from sessionStorage:", e);
+        }
+
+        // 2. Fetch from Firestore
         const servicesDocRef = db.collection('poortjie').doc('services');
         servicesDocRef.get().then(doc => {
             if (doc.exists) {
                 const homeScreenData = doc.data().homeScreen;
                 if (homeScreenData && typeof homeScreenData === 'object') {
                     const categories = Object.keys(homeScreenData);
-                    categories.forEach(categoryName => {
-                        const option = document.createElement('option');
-                        option.value = categoryName;
-                        option.textContent = categoryName;
-                        businessTypeInput.appendChild(option);
-                    });
+                    
+                    // 3. Update cache and render
+                    renderCategoryOptions(categories);
+                    try {
+                        sessionStorage.setItem('categoriesCache', JSON.stringify(categories));
+                    } catch (e) {
+                        console.error("Could not write to sessionStorage:", e);
+                    }
                 }
             }
         }).catch(error => {
             console.error("Error fetching categories: ", error);
         }).finally(() => {
-            const otherOption = document.createElement('option');
-            otherOption.value = 'Other';
-            otherOption.textContent = 'Other';
-            businessTypeInput.appendChild(otherOption);
+            // Ensure "Other" is only added once if not already there
+            if (!Array.from(businessTypeInput.options).some(opt => opt.value === 'Other')) {
+                const otherOption = document.createElement('option');
+                otherOption.value = 'Other';
+                otherOption.textContent = 'Other';
+                businessTypeInput.appendChild(otherOption);
+            }
+        });
+    };
+
+    const renderCategoryOptions = (categories) => {
+        // Clear existing options except the first one (Select a category)
+        while (businessTypeInput.options.length > 1) {
+            businessTypeInput.remove(1);
+        }
+        
+        categories.forEach(categoryName => {
+            const option = document.createElement('option');
+            option.value = categoryName;
+            option.textContent = categoryName;
+            businessTypeInput.appendChild(option);
         });
     };
 
