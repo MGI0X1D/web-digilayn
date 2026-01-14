@@ -80,6 +80,8 @@
                 return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Approved</span>`;
             case 'rejected':
                 return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Rejected</span>`;
+            case 'update':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">Update Requested</span>`;
             default:
                 return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-yellow-600 bg-yellow-200">Pending</span>`;
         }
@@ -112,7 +114,7 @@
                         <h3 class="text-xl font-semibold mb-3 border-b pb-2">${userEmail}</h3>
                 `;
                 applicationsByUser[userEmail].forEach(app => {
-                    const isPending = !app.status || app.status === 'pending';
+                    const isPending = !app.status || app.status === 'pending' || app.status === 'update';
                     const isOther = app.businessType === 'Other';
                     
                     html += `
@@ -141,8 +143,12 @@
                             <div class="flex gap-2 shrink-0">
                                 ${isPending ? `
                                 <button onclick="approveApplication('${app.id}')" class="bg-green-500 text-white px-4 py-2 rounded font-bold hover:bg-green-600 transition shadow-sm">Approve</button>
+                                <button onclick="requestUpdate('${app.id}')" class="bg-blue-500 text-white px-4 py-2 rounded font-bold hover:bg-blue-600 transition shadow-sm">Update</button>
                                 <button onclick="rejectApplication('${app.id}')" class="bg-red-500 text-white px-4 py-2 rounded font-bold hover:bg-red-600 transition shadow-sm">Reject</button>
-                                ` : ''}
+                                ` : `
+                                <button onclick="approveApplication('${app.id}')" class="bg-gray-500 text-white px-4 py-2 rounded font-bold hover:bg-gray-600 transition shadow-sm">Re-Approve/Update</button>
+                                <button onclick="requestUpdate('${app.id}')" class="bg-blue-500 text-white px-4 py-2 rounded font-bold hover:bg-blue-600 transition shadow-sm">Request Update</button>
+                                `}
                             </div>
                         </div>
                     `;
@@ -229,6 +235,16 @@
                 console.log("Application rejected!");
             }).catch(error => {
                 console.error("Error rejecting application: ", error);
+            });
+        }
+    }
+
+    function requestUpdate(appId) {
+        if (confirm('Request user to update this application?')) {
+            db.doc(`poortjie/applications/listings/${appId}`).update({ status: 'update' }).then(() => {
+                console.log("Update requested!");
+            }).catch(error => {
+                console.error("Error requesting update: ", error);
             });
         }
     }

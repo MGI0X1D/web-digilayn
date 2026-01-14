@@ -66,6 +66,28 @@ async function renderServiceCard(provider, serviceKey, sortOption = 'most-liked'
             commentsHtml = `<p class="text-xs opacity-50 italic">No comments yet.</p>`;
         }
 
+        // Process Social Links
+        let socialLinksHtml = '';
+        const ensureHttps = (url) => {
+            if (!url) return url;
+            if (!/^https?:\/\//i.test(url)) {
+                return `https://${url}`;
+            }
+            return url;
+        };
+
+        if (provider.whatsapp) {
+            socialLinksHtml += `<a href="https://wa.me/27${provider.whatsapp.substring(1)}" target="_blank" class="text-green-500 hover:text-green-600 transition text-xl" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>`;
+        }
+        if (provider.facebook) {
+            const fbUrl = ensureHttps(provider.facebook);
+            socialLinksHtml += `<a href="${fbUrl}" target="_blank" class="text-blue-600 hover:text-blue-700 transition text-xl" title="Facebook"><i class="fab fa-facebook"></i></a>`;
+        }
+        if (provider.website) {
+            const webUrl = ensureHttps(provider.website);
+            socialLinksHtml += `<a href="${webUrl}" target="_blank" class="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-white transition text-xl" title="Website"><i class="fas fa-globe"></i></a>`;
+        }
+
         let cardHtml = template
             .replace(/{{businessName}}/g, provider.businessName)
             .replace(/{{subHeading}}/g, provider.subHeading)
@@ -77,6 +99,7 @@ async function renderServiceCard(provider, serviceKey, sortOption = 'most-liked'
             .replace(/{{phone}}/g, provider.phone)
             .replace(/{{serviceId}}/g, provider.id)
             .replace(/{{serviceKey}}/g, serviceKey)
+            .replace(/{{socialLinks}}/g, socialLinksHtml)
             .replace(/{{comments}}/g, commentsHtml);
 
         const cardElement = document.createElement('div');
