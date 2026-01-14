@@ -189,9 +189,9 @@
             let rankAction = '';
             if (route.returns) {
                 if (route.lat && route.lng) {
-                    rankAction = `onclick="window.open('https://www.google.com/maps/search/?api=1&query=${route.lat},${route.lng}', '_blank')"`;
+                    rankAction = `onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${route.lat},${route.lng}&travelmode=driving', '_blank')"`;
                 } else {
-                    rankAction = `onclick="alert('${route.location || 'Taxi ranks are located at Poortjie main entrance and shopping centre.'}')"`;
+                    rankAction = `onclick="alert('${route.location || 'Location is not confirmed yet.'}')"`;
                 }
             }
 
