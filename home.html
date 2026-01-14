@@ -27,11 +27,9 @@
 <body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
 
 <div class="fixed top-5 right-5 z-50" id="user-controls">
-    <button id="theme-toggle" class="px-4 py-2 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition flex items-center gap-2 hidden">
-        <span id="theme-icon">🌓</span> <span class="text-xs font-bold uppercase tracking-widest text-[10px]">Mode</span>
-    </button>
-
-    <div id="hamburger-menu" class="hidden relative">
+    <!-- Theme Toggle removed from here and moved to hamburger menu -->
+    
+    <div id="hamburger-menu" class="relative">
         <button id="hamburger-btn" class="p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
@@ -40,7 +38,9 @@
                 <span id="menu-theme-icon">🌓</span> Mode
             </button>
             <a id="admin-link" href="admin/admin.html" onclick="window.top.location.replace('admin/admin.html'); return false;" class="hidden block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Admin</a>
-            <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</button>
+            <a href="services/business-form.html" onclick="window.top.location.replace('services/business-form.html'); return false;" class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Add Your Business</a>
+            <div id="auth-divider" class="hidden border-t border-gray-100 dark:border-slate-700 my-1"></div>
+            <button id="logout-btn" class="hidden w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</button>
         </div>
     </div>
 </div>
@@ -56,7 +56,7 @@
 
     <div class="flex flex-wrap justify-center gap-4 mt-8">
         <a href="#services" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">Explore Services</a>
-        <a href="services/business-form.html" onclick="window.top.location.replace('services/business-form.html'); return false;" class="px-8 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">List Your Business</a>
+        <a href="services/taxi-routes.html" onclick="window.top.location.replace('services/taxi-routes.html'); return false;" class="px-8 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">Taxi Routes</a>
     </div>
 </header>
 
@@ -179,13 +179,7 @@
                             list: service.listing || [],
                             url: `services/${key.toLowerCase()}.html`,
                             target: '_top',
-                            btnText: `Explore ${key}`,
-                            ...(key === 'Transport' ? { 
-                                extraBtn: { 
-                                    text: 'Taxi Routes', 
-                                    url: 'services/taxi-routes.html' 
-                                } 
-                            } : {})
+                            btnText: `Explore ${key}`
                         };
                     });
                     
@@ -220,12 +214,12 @@
         document.getElementById('sort-list').addEventListener('change', filterAndSort);
 
         // AUTH & UI SCRIPTS
-        const themeToggle = document.getElementById('theme-toggle');
         const hamburgerMenu = document.getElementById('hamburger-menu');
         const hamburgerBtn = document.getElementById('hamburger-btn');
         const menuItems = document.getElementById('menu-items');
         const logoutBtn = document.getElementById('logout-btn');
         const adminLink = document.getElementById('admin-link');
+        const authDivider = document.getElementById('auth-divider');
 
         hamburgerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -234,22 +228,34 @@
 
         firebase.auth().onAuthStateChanged(user => {
             if (user) {
-                themeToggle.classList.add('hidden');
-                hamburgerMenu.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                authDivider.classList.remove('hidden');
                 firebase.firestore().collection('users').doc(user.uid).get().then((doc) => {
                     if (doc.exists && doc.data().roles?.digilayn?.isSuperUser) {
                         adminLink.classList.remove('hidden');
                     }
                 });
             } else {
-                themeToggle.classList.remove('hidden');
-                hamburgerMenu.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                authDivider.classList.add('hidden');
+                adminLink.classList.add('hidden');
             }
         });
 
         window.onclick = (e) => {
             if (hamburgerMenu && !hamburgerMenu.contains(e.target)) menuItems.classList.add('hidden');
         };
+
+        // THEME TOGGLE LOGIC
+        const menuThemeToggle = document.getElementById('menu-theme-toggle');
+        const menuThemeIcon = document.getElementById('menu-theme-icon');
+        
+        if (menuThemeToggle) {
+            menuThemeToggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+        }
 
         logoutBtn.onclick = () => firebase.auth().signOut();
     };
