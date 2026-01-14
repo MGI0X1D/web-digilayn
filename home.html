@@ -39,7 +39,7 @@
             <button id="menu-theme-toggle" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3">
                 <span id="menu-theme-icon">🌓</span> Mode
             </button>
-            <a id="admin-link" href="admin/admin.html" class="hidden block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Admin</a>
+            <a id="admin-link" href="admin/admin.html" target="_top" class="hidden block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Admin</a>
             <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Logout</button>
         </div>
     </div>
@@ -56,7 +56,7 @@
 
     <div class="flex flex-wrap justify-center gap-4 mt-8">
         <a href="#services" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">Explore Services</a>
-        <a href="services/business-form.html" class="px-8 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">List Your Business</a>
+        <a href="services/business-form.html" target="_top" class="px-8 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">List Your Business</a>
     </div>
 </header>
 
@@ -65,9 +65,9 @@
     <div class="mb-12 flex flex-col md:flex-row gap-4">
         <div class="relative flex-grow">
             <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            <input type="text" id="search-bar" placeholder="Search categories..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <label for="search-bar"></label><input type="text" id="search-bar" placeholder="Search categories..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
         </div>
-        <select id="sort-list" class="px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+        <label for="sort-list"></label><select id="sort-list" class="px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
             <option value="asc">Name (A-Z)</option>
             <option value="desc">Name (Z-A)</option>
         </select>
@@ -80,7 +80,7 @@
         <div class="max-w-3xl">
             <h2 class="text-3xl font-bold mb-4">Built for the community.</h2>
             <p class="text-lg opacity-80 mb-6">
-                Poortjie Services uses cost-effective, modern architecture (like pure HTML, CSS and JavaScript) to ensure that even the smallest local business has a high-performance home online.
+                Poortjie Services uses cost-effective, modern architecture (like pure HTML, CSS, and JavaScript) to ensure that even the smallest local business has a high-performance home online.
             </p>
             <div class="flex gap-4">
                 <span class="text-[10px] font-bold px-2 py-1 border border-green-500/30 rounded text-green-500 uppercase tracking-widest">Mobile First</span>
@@ -96,6 +96,8 @@
 </footer>
 
 <script src="scripts/theme.js"></script>
+<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+<script src="scripts/local-db.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -120,7 +122,7 @@
                             ${service.list.map(item => `<li class="flex items-center gap-2">${item}</li>`).join('')}
                         </ul>
                     </div>
-                    <a href="${service.url}" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">${service.btnText}</a>
+                    <a href="${service.url}" target="${service.target || '_self'}" class="mt-6 block text-center py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition">${service.btnText}</a>
                 </div>
             </section>
         `).join('');
@@ -173,6 +175,7 @@
                             description: service.description,
                             list: service.listing || [],
                             url: `services/${key.toLowerCase()}.html`,
+                            target: '_top',
                             btnText: `Explore ${key}`
                         };
                     });

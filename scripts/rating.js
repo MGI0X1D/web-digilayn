@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Like Comment Action ---
     const handleLikeClick = async (btn) => {
         if (!currentUser) {
-            sessionStorage.setItem('redirectUrl', window.location.href);
-            window.location.href = '../authentication/login.html';
+            sessionStorage.setItem('redirectUrl', window.top.location.href);
+            window.top.location.replace('../authentication/login.html');
             return;
         }
 
@@ -84,8 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Modal Control & Data Loading ---
     window.openRatingModal = async (sId, sKey) => {
         if (!currentUser) {
-            // Adjust path if your login page is elsewhere
-            window.location.href = '../authentication/login.html';
+            sessionStorage.setItem('redirectUrl', window.top.location.href);
+            window.top.location.replace('../authentication/login.html');
             return;
         }
         serviceId = sId;

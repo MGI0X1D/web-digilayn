@@ -32,6 +32,8 @@
 </div>
 
 <script src="../scripts/theme.js"></script>
+<script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+<script src="../scripts/local-db.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -50,16 +52,16 @@
                         loadApplications();
                     });
                 } else {
-                    window.location.replace('../index.html');
+                    window.top.location.replace('../index.html');
                 }
             }).catch((error) => {
                 console.error("Error getting user data:", error);
                 alert('An error occurred while verifying your permissions.');
-                window.location.replace('../index.html');
+                window.top.location.replace('../index.html');
             });
         } else {
-            sessionStorage.setItem('redirectUrl', window.location.href);
-            window.location.href = '../authentication/login.html';
+            sessionStorage.setItem('redirectUrl', window.top.location.href);
+            window.top.location.replace('../authentication/login.html');
         }
     });
 
