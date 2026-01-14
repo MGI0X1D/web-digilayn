@@ -38,6 +38,7 @@
                         <button onclick="setFilter('pending')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="pending">Pending</button>
                         <button onclick="setFilter('approved')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="approved">Approved</button>
                         <button onclick="setFilter('rejected')" class="filter-chip px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="rejected">Rejected</button>
+                        <button id="disabled-filter" onclick="setFilter('disabled')" class="filter-chip hidden px-4 py-1 rounded-full text-sm font-semibold border transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-600" data-filter="disabled">Disabled</button>
                     </div>
 
                     <!-- Sort -->
@@ -76,6 +77,7 @@
     let currentCategories = [];
     let allApplications = [];
     let currentFilter = 'all';
+    let isSuperUser = false;
 
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
@@ -83,13 +85,17 @@
             userRef.get().then((doc) => {
                 if (doc.exists) {
                     const userData = doc.data();
-                    const isSuperUser = userData.roles?.digilayn?.isSuperUser === true;
+                    isSuperUser = userData.roles?.digilayn?.isSuperUser === true;
                     const isPoortjieAdmin = userData.roles?.poortjie?.isAdmin === true;
 
                     if (isSuperUser || isPoortjieAdmin) {
                         const welcomeMsg = document.getElementById('welcome-message');
                         const name = userData.name || (isSuperUser ? 'Super User' : 'Admin');
                         welcomeMsg.textContent = `Welcome, ${name}!`;
+                        
+                        if (isSuperUser) {
+                            document.getElementById('disabled-filter').classList.remove('hidden');
+                        }
                         
                         document.getElementById('admin-content').classList.remove('hidden');
                         fetchCategories().then(() => {
@@ -129,6 +135,8 @@
                 return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-green-600 bg-green-200">Approved</span>`;
             case 'rejected':
                 return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-red-600 bg-red-200">Rejected</span>`;
+            case 'disabled':
+                return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-gray-600 bg-gray-200">Disabled</span>`;
             case 'update':
                 return `<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">Update Requested</span>`;
             default:
@@ -257,11 +265,46 @@
                         <button onclick="requestUpdate('${app.id}')" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-sm">Update</button>
                         <button onclick="rejectApplication('${app.id}')" class="bg-red-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow-sm">Reject</button>
                         ` : ''}
+                        ${isSuperUser && app.status !== 'disabled' ? `
+                        <button onclick="disableListing('${app.id}')" class="bg-slate-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-slate-700 transition shadow-sm">Disable</button>
+                        ` : ''}
                     </div>
                 </div>
             `;
         });
         applicationsList.innerHTML = html;
+    }
+
+    async function disableListing(appId) {
+        if (!confirm('Are you sure you want to disable this listing? It will be removed from public view.')) return;
+
+        try {
+            const appRef = db.collection('poortjie').doc('applications').collection('listings').doc(appId);
+            const appDoc = await appRef.get();
+            if (!appDoc.exists) throw "Application does not exist!";
+            const appData = appDoc.data();
+
+            const servicesRef = db.collection('poortjie').doc('services');
+            
+            await db.runTransaction(async (transaction) => {
+                const servicesDoc = await transaction.get(servicesRef);
+                const servicesData = servicesDoc.data() || {};
+                const homeScreen = servicesData.homeScreen || {};
+                const category = appData.businessType;
+
+                if (homeScreen[category] && homeScreen[category].data && homeScreen[category].data[appId]) {
+                    delete homeScreen[category].data[appId];
+                    transaction.update(servicesRef, { homeScreen });
+                }
+
+                transaction.update(appRef, { status: 'disabled' });
+            });
+
+            alert('Listing disabled and removed from public view.');
+        } catch (error) {
+            console.error("Error disabling listing:", error);
+            alert('Failed to disable listing: ' + error);
+        }
     }
 
     async function approveApplication(appId) {
