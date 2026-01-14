@@ -259,17 +259,6 @@
             if (hamburgerMenu && !hamburgerMenu.contains(e.target)) menuItems.classList.add('hidden');
         };
 
-        // THEME TOGGLE LOGIC
-        const menuThemeToggle = document.getElementById('menu-theme-toggle');
-        const menuThemeIcon = document.getElementById('menu-theme-icon');
-        
-        if (menuThemeToggle) {
-            menuThemeToggle.addEventListener('click', () => {
-                const isDark = document.documentElement.classList.toggle('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            });
-        }
-
         logoutBtn.onclick = () => firebase.auth().signOut();
     };
 

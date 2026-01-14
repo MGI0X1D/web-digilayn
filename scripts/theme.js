@@ -1,45 +1,53 @@
-const themeToggle = document.getElementById('theme-toggle');
-const menuThemeToggle = document.getElementById('menu-theme-toggle');
-const html = document.documentElement;
-const themeIcon = document.getElementById('theme-icon');
-const menuThemeIcon = document.getElementById('menu-theme-icon');
+// theme.js - Universal theme handler
+(function() {
+    const html = document.documentElement;
+    const themeIcon = document.getElementById('theme-icon');
+    const menuThemeIcon = document.getElementById('menu-theme-icon');
 
-const setIcon = (iconElement) => {
-    if (!iconElement) return;
-    if (html.classList.contains('dark')) {
-        iconElement.textContent = '☀️';
+    const setIcon = (iconElement) => {
+        if (!iconElement) return;
+        if (html.classList.contains('dark')) {
+            iconElement.textContent = '☀️';
+        } else {
+            iconElement.textContent = '🌓';
+        }
+    };
+
+    const updateAllIcons = () => {
+        setIcon(themeIcon);
+        setIcon(menuThemeIcon);
+    };
+
+    // 1. Immediate application (to prevent flash of unstyled content)
+    if (localStorage.getItem('theme') === 'dark') {
+        html.classList.add('dark');
     } else {
-        iconElement.textContent = '🌓';
-    }
-};
-
-const updateAllIcons = () => {
-    setIcon(themeIcon);
-    setIcon(menuThemeIcon);
-};
-
-// Apply the theme on initial load
-if (localStorage.getItem('theme') === 'dark') {
-    html.classList.add('dark');
-}
-updateAllIcons();
-
-const toggleTheme = () => {
-    html.classList.toggle('dark');
-
-    if (html.classList.contains('dark')) {
-        localStorage.setItem('theme', 'dark');
-    } else {
-        localStorage.setItem('theme', 'light');
+        html.classList.remove('dark');
     }
 
-    updateAllIcons();
-};
+    // 2. DOMContentLoaded logic
+    const initTheme = () => {
+        updateAllIcons();
 
-if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-}
+        const themeToggle = document.getElementById('theme-toggle');
+        const menuThemeToggle = document.getElementById('menu-theme-toggle');
 
-if (menuThemeToggle) {
-    menuThemeToggle.addEventListener('click', toggleTheme);
-}
+        const toggleTheme = () => {
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateAllIcons();
+            
+            // Dispatch event for any other listeners
+            window.dispatchEvent(new Event('themeChanged'));
+        };
+
+        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+        if (menuThemeToggle) menuThemeToggle.addEventListener('click', toggleTheme);
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTheme);
+    } else {
+        initTheme();
+    }
+})();
