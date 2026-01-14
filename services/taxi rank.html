@@ -114,13 +114,33 @@
 
     function renderRoutes(routes) {
         routesGrid.innerHTML = '';
-        Object.keys(routes).forEach(key => {
-            const route = routes[key];
+        
+        // Convert routes object to array and sort by destination
+        const sortedRoutes = Object.keys(routes).map(key => ({
+            id: key,
+            ...routes[key]
+        })).sort((a, b) => a.destination.localeCompare(b.destination));
+
+        sortedRoutes.forEach(route => {
             const card = document.createElement('div');
             card.className = 'card p-6 rounded-2xl border-l-4 border-l-green-500 flex flex-col shadow-sm hover:shadow-md transition';
+            
+            let rankAction = '';
+            if (route.returns) {
+                if (route.lat && route.lng) {
+                    rankAction = `onclick="window.open('https://www.google.com/maps/search/?api=1&query=${route.lat},${route.lng}', '_blank')"`;
+                } else {
+                    rankAction = `onclick="alert('${route.location || 'Taxi ranks are located at Poortjie main entrance and shopping centre.'}')"`;
+                }
+            }
+
             card.innerHTML = `
                 <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xl font-bold">${route.origin} <i class="fas fa-arrow-right text-xs mx-1 opacity-50"></i> ${route.destination}</h3>
+                    <h3 class="text-xl font-bold">
+                        ${route.origin} 
+                        <i class="fas ${route.returns ? 'fa-exchange-alt' : 'fa-arrow-right'} text-xs mx-1 opacity-50"></i> 
+                        ${route.destination}
+                    </h3>
                     <span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-sm font-bold">R${route.fare}</span>
                 </div>
                 <div class="space-y-3 mb-6 flex-grow">
@@ -128,18 +148,24 @@
                         <i class="fas fa-clock w-5 text-green-500"></i>
                         <span>${route.hours}</span>
                     </div>
-                    <div class="flex items-center gap-3 text-sm">
-                        <i class="fas fa-sync w-5 text-green-500"></i>
-                        <span>${route.returns ? 'Returns available' : 'One way only'}</span>
-                    </div>
+
                     <div class="flex items-center gap-3 text-sm">
                         <i class="fas fa-info-circle w-5 text-green-500"></i>
                         <span class="capitalize">${route.type.replace('_', ' ')}</span>
                     </div>
+
+                    ${route.location ? `
+                    <div class="flex items-center gap-3 text-sm">
+                        <i class="fas fa-map-marker-alt w-5 text-green-500"></i>
+                        <span>${route.location}</span>
+                    </div>
+                    ` : ''}
                 </div>
-                <button onclick="alert('Taxi ranks are located at Poortjie main entrance and shopping centre.')" class="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-green-600 hover:text-white transition rounded-lg font-bold text-sm">
-                    View Rank Location
+                ${route.returns ? `
+                <button ${rankAction} class="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-green-600 hover:text-white transition rounded-lg font-bold text-sm">
+                    View ${route.destination} rank
                 </button>
+                ` : ''}
             `;
             routesGrid.appendChild(card);
         });
