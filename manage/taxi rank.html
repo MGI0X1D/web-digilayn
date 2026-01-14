@@ -391,7 +391,13 @@
 
     async function saveToFirestore(successMsg = 'Changes saved successfully') {
         try {
-            await db.collection('poortjie').doc('taxi_routes').set(currentData);
+            const currentUserId = firebase.auth().currentUser?.uid;
+            const dataToSave = {
+                ...currentData,
+                lastModifiedBy: currentUserId,
+                lastModifiedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            await db.collection('poortjie').doc('taxi_routes').set(dataToSave);
             showStatus(successMsg);
         } catch (err) {
             console.error("Error saving data:", err);
