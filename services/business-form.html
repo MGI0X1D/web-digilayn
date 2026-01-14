@@ -28,6 +28,12 @@
 
 <main class="max-w-xl mx-auto px-6 pb-24">
     <div id="form-container" class="card hidden flex-col p-8 rounded-2xl border-l-4 border-l-green-500">
+        <div id="applications-section" class="mb-12 hidden">
+            <h2 class="text-2xl font-bold mb-6 text-center">My Applications</h2>
+            <div id="user-applications-list" class="space-y-4"></div>
+            <hr class="my-8 border-gray-200 dark:border-slate-700">
+        </div>
+
         <h2 class="text-2xl font-bold mb-6 text-center">Business Listing</h2>
         <div id="status-container" class="hidden text-center mb-4 space-y-2"></div>
         <p class="text-center opacity-70 mb-8">Fill in the details below to list your business on Poortjie Services.</p>
@@ -86,11 +92,9 @@
             </div>
         </form>
 
-        <!-- Preview Section -->
         <div id="preview-container" class="mt-12 pt-12 border-t border-gray-100 dark:border-slate-700 hidden">
             <h3 class="text-xl font-bold mb-6 text-center">Preview Your Listing</h3>
             <div id="card-preview" class="max-w-sm mx-auto">
-                <!-- Live preview card will be injected here -->
             </div>
             <p class="text-xs text-center opacity-50 my-6 italic">Note: Rating and comments are for display purposes in this preview.</p>
             
@@ -129,13 +133,14 @@
     const descInput = document.getElementById('description');
     const previewContainer = document.getElementById('preview-container');
     const cardPreview = document.getElementById('card-preview');
+    const applicationsSection = document.getElementById('applications-section');
+    const userApplicationsList = document.getElementById('user-applications-list');
 
     let isAddressSelectedFromAutocomplete = false;
 
     showLoader();
 
     const fetchCategories = () => {
-        // 1. Try to load from cache
         try {
             const cachedCategories = sessionStorage.getItem('categoriesCache');
             if (cachedCategories) {
@@ -143,10 +148,8 @@
                 renderCategoryOptions(categories);
             }
         } catch (e) {
-            console.error("Could not read from sessionStorage:", e);
         }
 
-        // 2. Fetch from Firestore
         const servicesDocRef = db.collection('poortjie').doc('services');
         servicesDocRef.get().then(doc => {
             if (doc.exists) {
@@ -154,19 +157,15 @@
                 if (homeScreenData && typeof homeScreenData === 'object') {
                     const categories = Object.keys(homeScreenData);
                     
-                    // 3. Update cache and render
                     renderCategoryOptions(categories);
                     try {
                         sessionStorage.setItem('categoriesCache', JSON.stringify(categories));
                     } catch (e) {
-                        console.error("Could not write to sessionStorage:", e);
                     }
                 }
             }
         }).catch(error => {
-            console.error("Error fetching categories: ", error);
         }).finally(() => {
-            // Ensure "Other" is only added once if not already there
             if (!Array.from(businessTypeInput.options).some(opt => opt.value === 'Other')) {
                 const otherOption = document.createElement('option');
                 otherOption.value = 'Other';
@@ -177,12 +176,10 @@
     };
 
     const renderCategoryOptions = (categories) => {
-        // Clear existing options except the first one (Select a category)
         while (businessTypeInput.options.length > 1) {
             businessTypeInput.remove(1);
         }
         
-        // Sort categories alphabetically
         const sortedCategories = [...categories].sort((a, b) => a.localeCompare(b));
         
         sortedCategories.forEach(categoryName => {
@@ -191,6 +188,37 @@
             option.textContent = categoryName;
             businessTypeInput.appendChild(option);
         });
+    };
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'approved':
+                return `<span class="text-[10px] font-bold py-1 px-2 uppercase rounded-full text-green-700 bg-green-100 border border-green-200">Approved</span>`;
+            case 'rejected':
+                return `<span class="text-[10px] font-bold py-1 px-2 uppercase rounded-full text-red-700 bg-red-100 border border-red-200">Rejected</span>`;
+            default:
+                return `<span class="text-[10px] font-bold py-1 px-2 uppercase rounded-full text-yellow-700 bg-yellow-100 border border-yellow-200">Pending</span>`;
+        }
+    };
+
+    const renderUserApplications = (applications) => {
+        if (!applications || applications.length === 0) {
+            applicationsSection.classList.add('hidden');
+            return;
+        }
+
+        applicationsSection.classList.remove('hidden');
+        userApplicationsList.innerHTML = applications.map(app => `
+            <div class="p-4 rounded-xl bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 flex justify-between items-center">
+                <div>
+                    <h4 class="font-bold text-sm">${app.businessName}</h4>
+                    <p class="text-xs opacity-60">${app.businessType}</p>
+                </div>
+                <div>
+                    ${getStatusBadge(app.status)}
+                </div>
+            </div>
+        `).join('');
     };
 
     const lockForm = (data) => {
@@ -251,7 +279,6 @@
             const card = await renderServiceCard(mockProvider, businessType || 'Category');
             if (card) {
                 cardPreview.innerHTML = '';
-                // Disable the "Rate" button in preview
                 const rateBtn = card.querySelector('.rate-service');
                 if (rateBtn) {
                     rateBtn.disabled = true;
@@ -283,9 +310,12 @@
             fetchCategories();
             const applicationsRef = db.collection('poortjie').doc('applications').collection('listings').where('userId', '==', user.uid).orderBy('createdAt', 'desc');
             applicationsRef.get().then(snapshot => {
-                const pendingApplication = snapshot.docs.find(doc => doc.data().status === 'pending');
+                const applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderUserApplications(applications);
+
+                const pendingApplication = applications.find(app => app.status === 'pending');
                 if (pendingApplication) {
-                    lockForm(pendingApplication.data());
+                    lockForm(pendingApplication);
                     hideLoader();
                     formContainer.classList.remove('hidden');
                     formContainer.classList.add('flex');
@@ -308,7 +338,6 @@
                     });
                 }
             }).catch(error => {
-                 console.error("Error checking for applications: ", error);
                  hideLoader();
                  formContainer.classList.remove('hidden');
                  formContainer.classList.add('flex');
@@ -358,7 +387,6 @@
 
         db.collection('poortjie').doc('applications').collection('listings').add(businessData)
             .then(() => {
-                // Friendly success message using the status container instead of alert
                 statusContainer.innerHTML = `
                     <div class="p-4 rounded-lg bg-green-100 text-green-700 font-bold border border-green-200">
                         Success! Your business application has been submitted and is now pending review.
@@ -368,13 +396,11 @@
                 businessForm.classList.add('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                // Optional: reload or redirect after a delay
                 setTimeout(() => window.location.reload(), 3000);
             })
             .catch((error) => {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalBtnText;
-                console.error("Firebase Application Submission Error: ", error);
                 
                 statusContainer.innerHTML = `
                     <div class="p-4 rounded-lg bg-red-100 text-red-700 font-bold border border-red-200">
@@ -386,23 +412,17 @@
             });
     });
 
-    /**
-     * UPDATED AUTOCOMPLETE FUNCTION
-     * Fixed to strictly 5km from Poortjie Center
-     */
     function initAutocomplete() {
-        // Poortjie Center Coordinates provided
         const poortjieCenter = { lat: -26.456323807221267, lng: 27.77044633885547 };
 
-        // Define a 5km circle
         const circle = new google.maps.Circle({
             center: poortjieCenter,
-            radius: 5000 // 5km in meters
+            radius: 5000 
         });
 
         const autocomplete = new google.maps.places.Autocomplete(addressInput, {
             bounds: circle.getBounds(),
-            strictBounds: true, // This is crucial: it restricts results to the bounds only
+            strictBounds: true, 
             componentRestrictions: { country: "za" },
             fields: ["formatted_address", "geometry"],
             types: ["address"],
@@ -419,6 +439,5 @@
     }
 </script>
 <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCXnSxBam3mjlfEx3F4XL_7ZIwLEbov0n8&loading=async&libraries=places,geometry&callback=initAutocomplete"></script>
-
 </body>
 </html>
