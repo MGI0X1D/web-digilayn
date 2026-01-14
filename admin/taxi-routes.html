@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taxi Routes Manager | Poortjie Services</title>
+    <title>Taxi Rank Info Manager | Poortjie Services</title>
     <meta name="robots" content="noindex, nofollow">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -20,8 +20,8 @@
     <header class="max-w-6xl mx-auto pt-24 pb-16 px-6">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Taxi Routes Manager</h1>
-                <p class="text-xl opacity-80">Inject and manage taxi routes for Poortjie</p>
+                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Taxi Rank Info Manager</h1>
+                <p class="text-xl opacity-80">Inject and manage taxi rank info and routes for Poortjie</p>
             </div>
             <a href="admin.html" class="px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition">Back to Admin</a>
         </div>
@@ -31,12 +31,12 @@
         <div class="card p-8 rounded-2xl bg-white dark:bg-slate-800 shadow-xl">
             <h2 class="text-2xl font-bold mb-6">Route Data (JSON)</h2>
             <div class="mb-6">
-                <p class="mb-4 text-sm opacity-70">Paste your JSON data below. It should follow the structure with "routes" object containing route keys.</p>
+                <p class="mb-4 text-sm opacity-70">Paste your JSON data below. It should follow the structure with "news" array and "routes" object.</p>
                 <textarea id="json-input" rows="20" class="w-full p-4 font-mono text-sm border rounded-lg bg-gray-50 dark:bg-slate-900 dark:border-slate-700 focus:ring-2 focus:ring-green-500 outline-none"></textarea>
             </div>
             <div class="flex justify-end gap-4">
                 <button id="load-current" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition">Load Current</button>
-                <button id="save-routes" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">Inject Routes</button>
+                <button id="save-routes" class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition shadow-md">Inject Rank Info</button>
             </div>
             <div id="status-message" class="mt-4 p-4 rounded-lg hidden"></div>
         </div>
@@ -57,6 +57,10 @@
 
     // Default JSON if nothing in DB
     const defaultData = {
+      "news": [
+        "Welcome to the new Taxi Rank Info section!",
+        "Taxi fares remain stable for this month."
+      ],
       "routes": {
         "poortjie_to_lenasia": {
           "origin": "Poortjie",
@@ -142,12 +146,12 @@
     saveBtn.addEventListener('click', async () => {
         try {
             const data = JSON.parse(jsonInput.value);
-            if (!data.routes) {
-                throw new Error('JSON must contain a "routes" object.');
+            if (!data.routes && !data.news) {
+                throw new Error('JSON must contain at least a "routes" object or "news" array.');
             }
             
             await db.collection('poortjie').doc('taxi_routes').set(data);
-            showStatus('Routes successfully injected!');
+            showStatus('Taxi Rank Info successfully injected!');
         } catch (err) {
             showStatus('Error: ' + err.message, true);
         }
