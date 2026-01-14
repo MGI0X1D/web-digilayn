@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poortjie | Cash & Mashonisa Services</title>
+    <meta name="author" content="Musa Mgijima">
+    <meta name="description" content="Find reliable cash and mashonisa services in Poortjie, including local lenders and financial assistance.">
+    <meta name="keywords" content="Poortjie, cash, mashonisa, loans, financial services, local lenders">
+    <meta name="copyright" content="© 2026 Poortjie Services. All rights reserved.">
+    <meta name="robots" content="index,follow">
+    <meta name="theme-color" content="#22c55e">
+
+    <link rel="icon" href="../favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../styles/main.css">
+    <style>
+        body { transition: background-color 0.3s ease, color 0.3s ease; }
+        .card { transition: transform 0.2s ease; }
+        .selected { color: #f59e0b !important; }
+    </style>
+</head>
+<body class="font-sans antialiased bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+
+
+<header class="max-w-6xl mx-auto pt-20 pb-12 px-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase inline-block">Cash & Mashonisa</div>
+            <h1 class="text-4xl md:text-6xl font-extrabold mt-2 tracking-tight">Service Providers</h1>
+        </div>
+        <a href="../index.html" class="w-full md:w-auto text-center px-6 py-3 border-2 border-green-600 text-green-600 dark:text-green-400 font-bold rounded-lg hover:bg-green-600 hover:text-white transition whitespace-nowrap">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Home
+        </a>
+    </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-24">
+
+    <div class="mb-8 flex flex-col md:flex-row gap-4">
+        <div class="relative flex-grow">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="search-bar" placeholder="Search providers..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+        </div>
+        <select id="sort-list" class="px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+            <option value="rating">Sort by Rating</option>
+            <option value="name">Sort by Name (A-Z)</option>
+        </select>
+    </div>
+
+    <div id="service-provider-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Service provider cards will be injected here by JavaScript -->
+    </div>
+</main>
+
+<footer class="text-center py-12 border-t border-gray-100 dark:border-slate-800 opacity-50 text-xs">
+    &copy; 2026 Poortjie Services. Empowering poortjie economies.
+</footer>
+
+<div id="rating-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+</div>
+
+<script src="../scripts/theme.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../scripts/firebase.js"></script>
+<script src="../scripts/rating.js"></script>
+<script src="../scripts/card-renderer.js"></script>
+
+<script>
+    const serviceProviderGrid = document.getElementById('service-provider-grid');
+    let allProviders = [];
+
+    const addRatingButtonListeners = () => {
+        document.querySelectorAll('.rate-service').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const serviceId = e.currentTarget.dataset.serviceId;
+                const serviceKey = e.currentTarget.dataset.serviceKey;
+                window.openRatingModal(serviceId, serviceKey);
+            });
+        });
+    }
+
+    const renderProviders = async (providers) => {
+        serviceProviderGrid.innerHTML = '';
+        for (const provider of providers) {
+            const card = await renderServiceCard(provider, 'Cash & Mashonisa');
+            if (card) {
+                serviceProviderGrid.appendChild(card);
+            }
+        }
+        addRatingButtonListeners();
+    };
+
+    const fetchProviders = () => {
+        // 1. Try to load from cache first
+        try {
+            const cachedData = sessionStorage.getItem('cashProvidersCache');
+            if (cachedData) {
+                allProviders = JSON.parse(cachedData);
+                filterAndSort();
+            }
+        } catch (e) {
+            console.error("Could not read from sessionStorage:", e);
+        }
+
+        // 2. Fetch from Firestore
+        db.collection('poortjie').doc('services').get()
+            .then(doc => {
+                if (doc.exists) {
+                    const homeScreenData = doc.data().homeScreen;
+                    const cashData = homeScreenData['Cash & Mashonisa'] ? homeScreenData['Cash & Mashonisa'].data : null;
+                    if (cashData && typeof cashData === 'object') {
+                        allProviders = Object.keys(cashData)
+                            .map(key => ({
+                                id: key,
+                                ...cashData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
+                        
+                        // 3. Update cache and render
+                        filterAndSort();
+                        try {
+                            sessionStorage.setItem('cashProvidersCache', JSON.stringify(allProviders));
+                        } catch (e) {
+                            console.error("Could not write to sessionStorage:", e);
+                        }
+                    } else {
+                        serviceProviderGrid.innerHTML = '<p>No cash & mashonisa services found.</p>';
+                    }
+                } else {
+                     serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching services: ", error);
+                if (allProviders.length === 0) {
+                    serviceProviderGrid.innerHTML = '<p>Could not load service providers. Please try again later.</p>';
+                }
+            });
+    };
+    
+    const searchBar = document.getElementById('search-bar');
+    const sortList = document.getElementById('sort-list');
+
+    const filterAndSort = () => {
+        const searchTerm = searchBar.value.toLowerCase();
+        const sortValue = sortList.value;
+
+        let filteredProviders = allProviders.filter(provider => {
+            const name = provider.businessName.toLowerCase();
+            return name.includes(searchTerm);
+        });
+
+        if (sortValue === 'rating') {
+            filteredProviders.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        } else if (sortValue === 'name') {
+            filteredProviders.sort((a, b) => a.businessName.localeCompare(b.businessName));
+        }
+
+        renderProviders(filteredProviders);
+    };
+
+    searchBar.addEventListener('input', filterAndSort);
+    sortList.addEventListener('change', filterAndSort);
+
+    // Initial fetch
+    fetchProviders();
+</script>
+</body>
+</html>
