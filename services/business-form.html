@@ -476,6 +476,8 @@
                 description: description || 'Your business description will appear here...',
                 phone: phone || '000 000 0000',
                 address: address,
+                latitude: selectedLat,
+                longitude: selectedLng,
                 website: website,
                 whatsapp: whatsapp,
                 facebook: facebook,
@@ -771,6 +773,7 @@
             } else {
                 updateAddressFromPos(pos);
             }
+            updatePreview();
         });
 
         map.addListener("click", (e) => {
@@ -778,6 +781,7 @@
             if (distance <= 5000) {
                 marker.setPosition(e.latLng);
                 updateAddressFromPos(e.latLng);
+                updatePreview();
             }
         });
     }
@@ -858,6 +862,7 @@
                         marker.setPosition(place.geometry.location);
                         map.setCenter(place.geometry.location);
                     }
+                    updatePreview();
                 }
                 
                 validateForm();
