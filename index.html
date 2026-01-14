@@ -47,7 +47,7 @@
 
 <header class="max-w-6xl mx-auto pt-24 pb-16 px-6 text-center">
     <div class="mb-4 flex justify-center">
-        <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase">Poortjie Services</div>
+        <div class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest uppercase">services</div>
     </div>
     <h1 class="text-6xl font-extrabold mb-4 tracking-tight">Poortjie</h1>
     <p class="text-xl opacity-80 max-w-2xl mx-auto leading-relaxed">
@@ -163,7 +163,9 @@
             if (doc.exists) {
                 const homeScreenData = doc.data().homeScreen;
                 if (homeScreenData && typeof homeScreenData === 'object') {
-                    allServices = Object.keys(homeScreenData).map(key => {
+                    allServices = Object.keys(homeScreenData)
+                        .filter(key => homeScreenData[key].status !== 'inactive')
+                        .map(key => {
                         const service = homeScreenData[key];
                         return {
                             category: key,

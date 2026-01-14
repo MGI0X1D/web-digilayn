@@ -122,10 +122,12 @@
                     const homeScreenData = doc.data().homeScreen;
                     const techData = homeScreenData['Information Technology'].data;
                     if (techData && typeof techData === 'object') {
-                        allProviders = Object.keys(techData).map(key => ({
-                            id: key,
-                            ...techData[key]
-                        }));
+                        allProviders = Object.keys(techData)
+                            .map(key => ({
+                                id: key,
+                                ...techData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
                         
                         // 3. Update cache and render
                         filterAndSort();

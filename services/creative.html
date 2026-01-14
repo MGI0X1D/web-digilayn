@@ -122,10 +122,12 @@
                     const homeScreenData = doc.data().homeScreen;
                     const creativeData = homeScreenData.Creative.data;
                     if (creativeData && typeof creativeData === 'object') {
-                        allProviders = Object.keys(creativeData).map(key => ({
-                            id: key,
-                            ...creativeData[key]
-                        }));
+                        allProviders = Object.keys(creativeData)
+                            .map(key => ({
+                                id: key,
+                                ...creativeData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
                         
                         // 3. Update cache and render
                         filterAndSort();

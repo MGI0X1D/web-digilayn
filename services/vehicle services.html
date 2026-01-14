@@ -122,10 +122,12 @@
                     const homeScreenData = doc.data().homeScreen;
                     const vehicleData = homeScreenData['Vehicle Services'].data;
                     if (vehicleData && typeof vehicleData === 'object') {
-                        allProviders = Object.keys(vehicleData).map(key => ({
-                            id: key,
-                            ...vehicleData[key]
-                        }));
+                        allProviders = Object.keys(vehicleData)
+                            .map(key => ({
+                                id: key,
+                                ...vehicleData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
                         
                         // 3. Update cache and render
                         filterAndSort();

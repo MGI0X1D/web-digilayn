@@ -121,10 +121,12 @@
                     const homeScreenData = doc.data().homeScreen;
                     const transportData = homeScreenData.Transport.data;
                     if (transportData && typeof transportData === 'object') {
-                        allProviders = Object.keys(transportData).map(key => ({
-                            id: key,
-                            ...transportData[key]
-                        }));
+                        allProviders = Object.keys(transportData)
+                            .map(key => ({
+                                id: key,
+                                ...transportData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
                         
                         // 3. Update cache and render
                         filterAndSort();

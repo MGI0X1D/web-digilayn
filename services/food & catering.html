@@ -121,10 +121,12 @@
                     const homeScreenData = doc.data().homeScreen;
                     const cateringData = homeScreenData['Food & Catering'].data;
                     if (cateringData && typeof cateringData === 'object') {
-                        allProviders = Object.keys(cateringData).map(key => ({
-                            id: key,
-                            ...cateringData[key]
-                        }));
+                        allProviders = Object.keys(cateringData)
+                            .map(key => ({
+                                id: key,
+                                ...cateringData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
                         
                         // 3. Update cache and render
                         filterAndSort();

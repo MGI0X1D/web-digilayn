@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Handle Like button click (using closest to catch icon clicks too)
             const likeBtn = e.target.closest('.like-comment-btn');
             if (likeBtn) handleLikeClick(likeBtn);
+
+            // Handle Comment Sort Change
+            if (e.target.id === 'comment-sort') {
+                renderCommentsList(allComments);
+            }
         });
 
         // Listen for Firebase auth state changes
@@ -139,12 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const commentsList = document.getElementById('comments-list');
         if (!commentsList) return; // Guard if element doesn't exist in HTML
 
-        // Sort by likes descending, then by timestamp descending
+        // Sort by selected criteria
+        const sortValue = document.getElementById('comment-sort')?.value || 'most-liked';
+        
         const sorted = [...commentsToRender].sort((a, b) => {
             const likesA = a.likes ? Object.keys(a.likes).length : 0;
             const likesB = b.likes ? Object.keys(b.likes).length : 0;
 
-            if (likesB !== likesA) return likesB - likesA;
+            if (sortValue === 'most-liked') {
+                if (likesB !== likesA) return likesB - likesA;
+            } else if (sortValue === 'least-liked') {
+                if (likesA !== likesB) return likesA - likesB;
+            }
 
             const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
             const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;

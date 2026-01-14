@@ -121,10 +121,12 @@
                     const homeScreenData = doc.data().homeScreen;
                     const interiorData = homeScreenData['Home & Interior'].data;
                     if (interiorData && typeof interiorData === 'object') {
-                        allProviders = Object.keys(interiorData).map(key => ({
-                            id: key,
-                            ...interiorData[key]
-                        }));
+                        allProviders = Object.keys(interiorData)
+                            .map(key => ({
+                                id: key,
+                                ...interiorData[key]
+                            }))
+                            .filter(provider => provider.status === 'active');
                         
                         // 3. Update cache and render
                         filterAndSort();
