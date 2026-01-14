@@ -91,7 +91,7 @@
                 <div class="relative">
                     <input type="text" id="address" name="address" placeholder="Start typing your business address..." class="w-full p-3 rounded-lg bg-gray-200 dark:bg-slate-800 text-gray-900 dark:text-white border-2 border-transparent focus:border-green-500 focus:outline-none transition">
                     <button type="button" id="toggle-map-btn" class="absolute right-2 top-2 px-3 py-1 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 transition">
-                        <i class="fa-solid fa-map-location-dot mr-1"></i> Pick on Map
+                        <i class="fa-solid fa-map-location-dot mr-1"></i> Fix pin
                     </button>
                     <p id="address-error" class="absolute right-2 top-2 px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded shadow-sm hidden">Must be in Poortjie</p>
                 </div>
@@ -564,6 +564,17 @@
         validateForm();
     });
 
+    addressInput.addEventListener('click', () => {
+        if (selectedLat && selectedLng && map) {
+            const pos = { lat: selectedLat, lng: selectedLng };
+            map.panTo(pos);
+            map.setZoom(17);
+            if (mapContainer.classList.contains('hidden')) {
+                toggleMapBtn.click();
+            }
+        }
+    });
+
     auth.onAuthStateChanged(user => {
         if (user) {
             fetchCategories();
@@ -712,9 +723,11 @@
         const poortjieCenter = { lat: -26.456323807221267, lng: 27.77044633885547 };
         geocoder = new google.maps.Geocoder();
 
+        const initialPos = (selectedLat && selectedLng) ? { lat: selectedLat, lng: selectedLng } : poortjieCenter;
+
         map = new google.maps.Map(document.getElementById("map"), {
-            center: poortjieCenter,
-            zoom: 14,
+            center: initialPos,
+            zoom: (selectedLat && selectedLng) ? 17 : 14,
             mapTypeControl: false,
             streetViewControl: false,
             fullscreenControl: false,
@@ -744,7 +757,7 @@
         });
 
         marker = new google.maps.Marker({
-            position: poortjieCenter,
+            position: initialPos,
             map: map,
             draggable: true,
             title: "Drag to your business location",
@@ -840,14 +853,15 @@
             bounds: circle.getBounds(),
             strictBounds: true, 
             componentRestrictions: { country: "za" },
-            fields: ["formatted_address", "geometry"],
-            types: ["address"],
+            fields: ["formatted_address", "geometry", "name"],
+            types: ["address", "establishment"],
         });
 
         autocomplete.addListener("place_changed", () => {
             const place = autocomplete.getPlace();
-            if (place.formatted_address) {
-                addressInput.value = place.formatted_address;
+            if (place.formatted_address || place.name) {
+                // Use a simpler address if it's a specific place/establishment
+                addressInput.value = place.name || place.formatted_address;
                 isAddressSelectedFromAutocomplete = true;
                 
                 if (place.geometry && place.geometry.location) {
@@ -857,9 +871,12 @@
                     if (map && marker) {
                         marker.setPosition(place.geometry.location);
                         map.setCenter(place.geometry.location);
+                        map.setZoom(17);
+                        if (mapContainer.classList.contains('hidden')) {
+                            toggleMapBtn.click();
+                        }
                     }
                 }
-                
                 validateForm();
             }
         });
