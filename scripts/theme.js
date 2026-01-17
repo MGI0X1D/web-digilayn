@@ -9,7 +9,7 @@
         if (html.classList.contains('dark')) {
             iconElement.textContent = '☀️';
         } else {
-            iconElement.textContent = '🌓';
+            iconElement.textContent = '🌙';
         }
     };
 
